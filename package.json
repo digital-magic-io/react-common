@@ -1,7 +1,7 @@
 {
-  "name": "@digital-magic/ts-template",
-  "version": "1.0.1",
-  "description": "Template for Typescript based projects",
+  "name": "@digital-magic/react-common",
+  "version": "1.0.0",
+  "description": "Common types & utilities for strictly-typed React applications written with TS in FP style",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "sideEffects": false,
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/digital-magic-io/ts-template.git"
+    "url": "git+https://github.com/digital-magic-io/react-common.git"
   },
   "files": [
     "lib/",
@@ -30,16 +30,16 @@
   "author": "Jevgeni Goloborodko <jevgeni@digital-magic.io>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/digital-magic-io/ts-template/issues"
+    "url": "https://github.com/digital-magic-io/react-common/issues"
   },
-  "homepage": "https://github.com/digital-magic-io/ts-template#readme",
+  "homepage": "https://github.com/digital-magic-io/react-common#readme",
   "keywords": [
     "typescript",
-    "template"
+    "react"
   ],
   "tags": [
     "typescript",
-    "template"
+    "react"
   ],
   "devDependencies": {
     "@babel/plugin-proposal-optional-chaining": "^7.11.0",
@@ -58,7 +58,10 @@
     "tslint-immutable": "^6.0.1",
     "typescript": "^4.0.2"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/react": "^16.9.49",
+    "react": "^16.13.1"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"

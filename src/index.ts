@@ -1,4 +1,3 @@
-export function hello() {
-  // tslint:disable-next-line:no-console
-  console.log('Hello')
-}
+import * as types from './types'
+import * as html from './html'
+import * as reactEvents from './events'
