@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "stripInternal": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react"
   },
   "include": ["./src", "./test"]
 }

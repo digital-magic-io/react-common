@@ -46,6 +46,7 @@
     "@types/jest": "^26.0.13",
     "@types/node": "^11.15.24",
     "@types/prettier": "^2.1.1",
+    "@types/react-router-dom": "^5.1.5",
     "husky": "^4.3.0",
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
@@ -59,8 +60,11 @@
     "typescript": "^4.0.2"
   },
   "dependencies": {
+    "@digital-magic/ts-common-utils": "^1.0.8",
     "@types/react": "^16.9.49",
-    "react": "^16.13.1"
+    "i18next": "^19.7.0",
+    "react": "^16.13.1",
+    "react-router-dom": "^5.2.0"
   },
   "husky": {
     "hooks": {
