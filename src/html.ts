@@ -161,9 +161,8 @@ export const appErrorHandler: <T>(errToMsg: ErrorToMessage<T>) => AppErrorHandle
  * @param errToMsgKey function that converts error to user-friendly message.
  */
 export const i18nAppErrorHandler: <T>(
-  t: TFunction,
   errToMsgKey: ErrorToMessageKey<T>
-) => AppErrorHandler<T> = i18nMapper(appErrorHandler)
+) => (t: TFunction) => AppErrorHandler<T> = i18nMapper(appErrorHandler)
 
 /**
  * Default implementation for Error Handler that sets it's errors to certain field.
@@ -191,6 +190,5 @@ export const errorToFieldHandler: <T>(errToMsg: ErrorToMessage<T>) => FieldError
  * @param errToMsgKey function that converts error to user-friendly message.
  */
 export const i18ErrorToFieldHandler: <T>(
-  t: TFunction,
   errToMsgKey: ErrorToMessageKey<T>
-) => FieldErrorHandler<T> = i18nMapper(errorToFieldHandler)
+) => (t: TFunction) => FieldErrorHandler<T> = i18nMapper(errorToFieldHandler)

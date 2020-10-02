@@ -54,9 +54,9 @@ export const appErrorEffect: <T>(errToMsg: ErrorToMessage<T>) => AppErrorEffect<
   onError
 ) => (err, operationName) => [appErrorHandler(errToMsg)(setError, onError)(err, operationName), [err]]
 
-export const i18nAppErrorEffect: <T>(t: TFunction, errToMsgKey: ErrorToMessageKey<T>) => AppErrorEffect<T> = i18nMapper(
-  appErrorEffect
-)
+export const i18nAppErrorEffect: <T>(
+  errToMsgKey: ErrorToMessageKey<T>
+) => (t: TFunction) => AppErrorEffect<T> = i18nMapper(appErrorEffect)
 
 export const errorToFieldEffect: <T>(errToMsg: ErrorToMessage<T>) => FieldErrorEffect<T> = (errToMsg) => (
   fieldName,
@@ -64,9 +64,8 @@ export const errorToFieldEffect: <T>(errToMsg: ErrorToMessage<T>) => FieldErrorE
 ) => (err, operationName) => [errorToFieldHandler(errToMsg)(fieldName, setFieldValue)(err, operationName), [err]]
 
 export const i18nErrorToFieldEffect: <T>(
-  t: TFunction,
   errToMsgKey: ErrorToMessageKey<T>
-) => FieldErrorEffect<T> = i18nMapper(errorToFieldEffect)
+) => (t: TFunction) => FieldErrorEffect<T> = i18nMapper(errorToFieldEffect)
 
 /*
 export const isLoadingEffect = (setLoading: Dispatch<boolean>) => (...loadingStates: boolean[]): [EffectCallback, DependencyList] => {

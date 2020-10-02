@@ -21,9 +21,8 @@ export const i18nAdapter: <T>(t: TFunction, errToMsgKey: ErrorToMessageKey<T>) =
  * Uses i18nAdapter to change function signature to use tranlsation.
  * @param f function that must receive ErrorToMessage and return result based on it
  */
-export const i18nMapper = <T, R>(f: (errToMsg: ErrorToMessage<T>) => R) => (
-  t: TFunction,
-  errToMsgKey: ErrorToMessageKey<T>
+export const i18nMapper = <T, R>(f: (errToMsg: ErrorToMessage<T>) => R) => (errToMsgKey: ErrorToMessageKey<T>) => (
+  t: TFunction
 ): R => f(i18nAdapter(t, errToMsgKey))
 
 /*
