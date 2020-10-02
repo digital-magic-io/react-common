@@ -44,10 +44,10 @@ export type AppErrorEffect<T> = (
   onError?: React.Dispatch<AppError<T>>
 ) => ErrorEffect<T>
 
-export type FieldErrorEffect<T> = (
+export type FieldErrorEffect<E> = <T>(
   fieldName: keyof T,
   setFieldValue: (fieldName: string, value: OptionalString) => void
-) => ErrorEffect<T>
+) => ErrorEffect<E>
 
 export const appErrorEffect: <T>(errToMsg: ErrorToMessage<T>) => AppErrorEffect<T> = (errToMsg) => (
   setError,
