@@ -128,10 +128,10 @@ export type AppErrorHandler<T> = (
   onError?: React.Dispatch<AppError<T>>
 ) => ErrorHandler<T>
 
-export type FieldErrorHandler<T> = (
+export type FieldErrorHandler<E> = <T>(
   fieldName: keyof T,
   setFieldValue: (fieldName: string, value: OptionalString) => void
-) => ErrorHandler<T>
+) => ErrorHandler<E>
 
 /**
  * Default implementation for Error Handler.
