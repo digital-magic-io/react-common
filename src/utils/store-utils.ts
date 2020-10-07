@@ -1,4 +1,5 @@
-import { getOrElse, isEmpty, OptionalString } from '@digital-magic/ts-common-utils/lib/type'
+import { isEmpty, OptionalString } from '@digital-magic/ts-common-utils/lib/type'
+import { getOrElse } from '@digital-magic/ts-common-utils/lib/nullable-utils'
 
 export type StoreType = OptionalString
 

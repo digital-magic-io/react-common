@@ -1,6 +1,7 @@
 import React from 'react'
-import { getOrElse, isEmpty } from '@digital-magic/ts-common-utils/lib/type'
+import { isEmpty } from '@digital-magic/ts-common-utils/lib/type'
 import { getFromStorage, setToStorage, StoreType } from '../utils/store-utils'
+import { getOrElse } from '@digital-magic/ts-common-utils/lib/nullable-utils'
 
 export function useStorageState(
   storage: Storage,

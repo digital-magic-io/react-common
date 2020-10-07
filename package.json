@@ -43,7 +43,7 @@
   ],
   "devDependencies": {
     "@babel/plugin-proposal-optional-chaining": "^7.11.0",
-    "@digital-magic/ts-common-utils": "^1.0.10",
+    "@digital-magic/ts-common-utils": "^1.0.11",
     "@types/jest": "^26.0.13",
     "@types/node": "^11.15.24",
     "@types/prettier": "^2.1.1",
@@ -65,7 +65,7 @@
     "typescript": "^4.0.2"
   },
   "peerDependencies": {
-    "@digital-magic/ts-common-utils": ">= 1.0.10",
+    "@digital-magic/ts-common-utils": ">= 1.0.11",
     "i18next": ">= 19.4.5",
     "react": ">= 16.13.1",
     "react-router-dom": ">= 5.2.0"
