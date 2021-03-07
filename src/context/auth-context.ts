@@ -14,6 +14,7 @@ export type AuthContextProps = {
 export const createAuthContext = <T extends AuthContextType>(defaultValue: T, displayName?: string): AuthContext<T> => {
   const ctx: AuthContext<T> = React.createContext<T>(defaultValue)
   if (isNotEmptyString(displayName)) {
+    // eslint-disable-next-line functional/immutable-data
     ctx.displayName = displayName
   }
   return ctx
