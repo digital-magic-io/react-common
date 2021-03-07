@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { hasValue, isEmpty, OptionalString, OptionalType } from '@digital-magic/ts-common-utils/lib/type'
 import { HtmlMouseEventHandler } from './events'
 import { AppError } from './types'
@@ -32,8 +32,8 @@ export const withRefObject = <T>(ref: React.RefObject<T>) => (f: React.Dispatch<
     f(ref.current)
   } else {
     // TODO: Find a way how to avoid console interaction here
-    // tslint:disable-next-line:no-console
-    console.error('Unable to call ref handler method because it has no value: ' + ref.current)
+    // eslint-disable-next-line no-console,@typescript-eslint/restrict-template-expressions
+    console.error(`Unable to call ref handler method because it has no value: ${ref.current}`)
   }
 }
 
@@ -41,13 +41,14 @@ export const withRefObject = <T>(ref: React.RefObject<T>) => (f: React.Dispatch<
  * Form handle to be used as type for Ref object.
  */
 export type FormHandle = {
-  doSubmit(): void
+  readonly doSubmit: () => void
 }
 
 /**
  * Submit a form using it's Ref object.
  * @param ref form reference
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const submitFormByRef = (ref: React.RefObject<FormHandle>) => withRefObject(ref)((h) => h.doSubmit())
 
 /**
@@ -63,8 +64,8 @@ export const handleWithSubmitForm: (ref: React.RefObject<FormHandle>) => HtmlMou
  * Modal dialog handle to be used as type for Ref object.
  */
 export type ModalDialogHandle = {
-  show(): void
-  hide(): void
+  readonly show: () => void
+  readonly hide: () => void
 }
 
 /**
@@ -144,7 +145,7 @@ export const appErrorHandler: <T>(errToMsg: ErrorToMessage<T>) => AppErrorHandle
   return () => {
     if (hasValue(err)) {
       // TODO: Find a way to not use console here
-      // tslint:disable-next-line:no-console
+      // eslint-disable-next-line no-console
       console.error('Failed to complete ' + operationName(), err)
       if (hasValue(onError)) {
         onError(err)
@@ -175,7 +176,7 @@ export const errorToFieldHandler: <T>(errToMsg: ErrorToMessage<T>) => FieldError
   return () => {
     if (hasValue(err)) {
       // TODO: Find a way to not use console here
-      // tslint:disable-next-line:no-console
+      // eslint-disable-next-line
       console.error('Failed to complete ' + operationName(), err)
     }
     // TODO: Create map function for such cases on ts-common-utils

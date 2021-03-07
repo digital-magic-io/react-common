@@ -7,7 +7,7 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf ./lib",
-    "lint": "tslint -p .",
+    "lint": "eslint .",
     "jest-clear-cache": "jest --clearCache",
     "prettier": "pretty-quick --check --pattern \"src/**/*.*(ts|tsx)\" --pattern \"test/**/*.*(ts|tsx)\"",
     "fix-prettier": "pretty-quick --pattern \"src/**/*.*(ts|tsx)\" --pattern \"test/**/*.*(ts|tsx)\"",

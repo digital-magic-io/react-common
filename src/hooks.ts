@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { hasValue, OptionalString, OptionalType } from '@digital-magic/ts-common-utils/lib/type'
 import { appErrorHandler, errorToFieldHandler, ErrorToMessage, FormHandle, ModalDialogHandle } from './html'
 import { AppError } from './types'
@@ -10,8 +10,8 @@ import { ErrorToMessageKey, i18nMapper } from './i18n'
  */
 type EffectHookParamsType = readonly [React.EffectCallback, React.DependencyList]
 
-export const useDialogRef = () => React.useRef<ModalDialogHandle>(null)
-export const useFormRef = () => React.useRef<FormHandle>(null)
+export const useDialogRef = (): React.RefObject<ModalDialogHandle> => React.useRef(null)
+export const useFormRef = (): React.RefObject<FormHandle> => React.useRef(null)
 
 export const successResponseEffect = <T>(handler: React.Dispatch<T>) => (
   response: OptionalType<T>
