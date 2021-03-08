@@ -1,7 +1,6 @@
 import React from 'react'
 import { isEmpty } from '@digital-magic/ts-common-utils/lib/type'
 import { getFromStorage, setToStorage, StoreType } from '../utils/store-utils'
-import { getOrElse } from '@digital-magic/ts-common-utils/lib/nullable-utils'
 
 export function useStorageState(
   storage: Storage,
@@ -11,7 +10,7 @@ export function useStorageState(
   const getStorageValue = getFromStorage(storage)
   const setStorageValue = setToStorage(storage)
   const initialValue: () => StoreType = () =>
-    getOrElse(getStorageValue(key), isEmpty(initialState) ? () => undefined : initialState)
+    getStorageValue(key) ?? isEmpty(initialState) ? undefined : initialState()
   const [value, setValue] = React.useState<StoreType>(initialValue)
 
   React.useEffect((): void => setStorageValue(key, value))

@@ -1,10 +1,8 @@
 import { isEmpty, OptionalString } from '@digital-magic/ts-common-utils/lib/type'
-import { getOrElse } from '@digital-magic/ts-common-utils/lib/nullable-utils'
 
 export type StoreType = OptionalString
 
-export const getFromStorage = (storage: Storage) => (key: string): StoreType =>
-  getOrElse(storage.getItem(key), () => undefined)
+export const getFromStorage = (storage: Storage) => (key: string): StoreType => storage.getItem(key) ?? undefined
 
 /*
 export function getFromStorage(storage: Storage, key: string): StoreType {
