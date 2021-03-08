@@ -1,6 +1,6 @@
 {
   "name": "@digital-magic/react-common",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Common types & utilities for strictly-typed React applications written with TS in FP style",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
