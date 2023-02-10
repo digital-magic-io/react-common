@@ -3,7 +3,7 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "plugins": ["@typescript-eslint", "prettier", "functional"],
+  "plugins": ["@typescript-eslint", "prettier", "functional", "react-hooks"],
   "overrides": [
     {
       "files": ["*.ts"]
@@ -17,22 +17,31 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:functional/external-recommended",
+    "plugin:functional/external-typescript-recommended",
     "plugin:functional/recommended",
     "plugin:functional/lite",
     "plugin:functional/no-exceptions",
     "plugin:functional/no-mutations",
-    "plugin:functional/no-object-orientation",
-    "plugin:functional/stylitic"
+    "plugin:functional/no-other-paradigms",
+    "plugin:functional/stylistic"
   ],
   "rules": {
     "prettier/prettier": "error",
     "no-console": "error",
     "no-eval": "error",
+    "no-unused-vars": "off",
     "@typescript-eslint/array-type": [
       "error",
       {
         "default": "generic"
+      }
+    ],
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": {
+          "attributes": false
+        }
       }
     ],
     "@typescript-eslint/no-explicit-any": "error",
@@ -52,6 +61,8 @@
     "@typescript-eslint/quotes": ["error", "single"],
     "@typescript-eslint/semi": ["error", "never"],
     "@typescript-eslint/space-infix-ops": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
     "functional/no-mixed-type": "off",
     "functional/no-return-void": "off"
   }
