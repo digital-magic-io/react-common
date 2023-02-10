@@ -28,7 +28,7 @@ export const useSerializedStorage = <T>(
   )
 
   React.useEffect(() => {
-    const storageHandler = (e: StorageEvent): void => {
+    const storageHandler = (e: Readonly<StorageEvent>): void => {
       if (e.key === key) {
         setStoredValue(getDeserializedValue())
       }

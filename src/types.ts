@@ -9,11 +9,6 @@ export type HtmlInputFocusEventHandler = React.FocusEventHandler<HTMLInputElemen
 export type HtmlFormSubmitEventHandler = React.FormEventHandler<HTMLFormElement>
 
 /**
- * Type for params that useEffect hook receives.
- */
-export type EffectHookParamsType = typeof React.useEffect
-
-/**
  * Type that should be used to define element class name.
  */
 export type ClassName = OptionalString

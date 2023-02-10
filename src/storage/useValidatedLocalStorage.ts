@@ -18,6 +18,8 @@ const zodSerializer = <V extends ZodType>(validator: V): Serializer<z.infer<V>> 
         if (validated.success) {
           return validated.data
         }
+        // TODO: Find another solution to avoid console output
+        // eslint-disable-next-line no-console
         console.error('Unable to deserialize value: ', validated.error)
       }
       return defaultValue()

@@ -5,6 +5,7 @@ import { HtmlMouseEventHandler } from './types'
 /**
  * Form handle to be used as type for Ref object.
  */
+// eslint-disable-next-line functional/readonly-type
 export type FormHandle = {
   readonly doSubmit: () => void
 }
@@ -12,6 +13,7 @@ export type FormHandle = {
 /**
  * Modal dialog handle to be used as type for Ref object.
  */
+// eslint-disable-next-line functional/readonly-type
 export type ModalDialogHandle = {
   readonly show: () => void
   readonly hide: () => void

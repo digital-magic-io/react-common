@@ -1,5 +1,6 @@
 import { TFunction } from 'i18next'
 
+// eslint-disable-next-line functional/no-mixed-types,functional/readonly-type
 export type MenuLink = {
   readonly to: string
   readonly translation: (t: TFunction) => string
