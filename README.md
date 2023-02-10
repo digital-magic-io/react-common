@@ -1,2 +1,2 @@
 # ts-template
-Template file for generic Type Script projects
+Common React types and utilities/hooks used in our TypeScript projects
