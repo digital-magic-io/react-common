@@ -1,3 +1,3 @@
 export * from './types'
-export * from './enums'
+export * from './classNames'
 export * from './refs'
