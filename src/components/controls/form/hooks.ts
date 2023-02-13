@@ -5,10 +5,9 @@ import { hasValue } from '@digital-magic/ts-common-utils'
 import { DeepRequired, FieldError, FormInputProps, UseFormContextResult, UseFormInputPropsResult } from './types'
 import { zodIs } from '../../../utils/zod'
 import { propertyKeysToPath } from './utils'
-import { useFormContext as useReactFormContext } from 'react-hook-form/dist/useFormContext'
 
 export const useFormContext = <T extends FieldValues>(): UseFormContextResult<T> => ({
-  ...useReactFormContext<T>(),
+  ...useNativeFormContext<T>(),
   names: createProxy<DeepRequired<T>>()
 })
 
