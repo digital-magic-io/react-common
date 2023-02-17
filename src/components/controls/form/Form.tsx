@@ -2,12 +2,12 @@ import * as React from 'react'
 import { FieldValues, FormProvider, SubmitErrorHandler, SubmitHandler, UseFormReturn } from 'react-hook-form'
 
 export type FormProps<T extends FieldValues> = Omit<React.HTMLAttributes<HTMLFormElement>, 'onSubmit'> &
+  React.PropsWithChildren &
   Readonly<{
     f: UseFormReturn<T> &
       Readonly<{
         onSubmit: SubmitHandler<T>
       }>
-    children: React.ReactNode
     onInvalid?: SubmitErrorHandler<T>
   }>
 
