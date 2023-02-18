@@ -1,12 +1,12 @@
 import * as z from 'zod'
 import { HttpMethod } from './types'
 import axios, { AxiosRequestConfig } from 'axios'
-import { Lazy } from '@digital-magic/ts-common-utils'
+import { evaluate, MaybeLazy } from '@digital-magic/ts-common-utils'
 import { invalidRequestError, invalidResponseError } from './errors'
 
 type RequestConfig<Response> = Readonly<
   Omit<AxiosRequestConfig<Response>, 'method' | 'url'> & {
-    url: string | Lazy<string>
+    url: MaybeLazy<string>
     method: HttpMethod
   }
 >
@@ -18,8 +18,6 @@ type RequestPayloadConfig<Request, RequestSchema extends z.ZodType<Request>> = R
 type ResponsePayloadConfig<Response, ResponseSchema extends z.ZodType<Response>> = Readonly<{
   responseSchema: ResponseSchema
 }>
-
-const evaluate = (value: string | Lazy<string>): string => (typeof value === 'string' ? value : value())
 
 const verifyRequestPayload = <Request, RequestSchema extends z.ZodType<Request>, Response>(
   opts: RequestConfig<Response> & RequestPayloadConfig<Request, RequestSchema>
