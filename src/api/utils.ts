@@ -4,18 +4,18 @@ import { evaluate } from '@digital-magic/ts-common-utils'
 import { invalidRequestError, invalidResponseError } from './errors'
 import { RequestDefinition, RequestContext } from './types'
 
-type RequestConfig<Request> = Readonly<
-  Omit<AxiosRequestConfig<Request>, 'method' | 'url'> & {
+type RequestConfig<RequestType> = Readonly<
+  Omit<AxiosRequestConfig<RequestType>, 'method' | 'url'> & {
     url: RequestDefinition['url']
     method: RequestDefinition['method']
   }
 >
 
-type RequestPayloadConfig<Request, RequestSchema extends z.ZodType<Request>> = Readonly<{
+type RequestPayloadConfig<RequestType, RequestSchema extends z.ZodType<RequestType>> = Readonly<{
   requestSchema: RequestSchema
 }>
 
-type ResponsePayloadConfig<Response, ResponseSchema extends z.ZodType<Response>> = Readonly<{
+type ResponsePayloadConfig<ResponseType, ResponseSchema extends z.ZodType<ResponseType>> = Readonly<{
   responseSchema: ResponseSchema
 }>
 
@@ -35,9 +35,9 @@ export const reqDefToReqInfo = (config: RequestDefinition, data: unknown): Reque
   data
 })
 
-const verifyRequestPayload = <Request, RequestSchema extends z.ZodType<Request>, Response>(
-  opts: RequestConfig<Response> & RequestPayloadConfig<Request, RequestSchema>
-): Promise<Request> => {
+const verifyRequestPayload = <RequestType, RequestSchema extends z.ZodType<RequestType>, ResponseType>(
+  opts: RequestConfig<ResponseType> & RequestPayloadConfig<RequestType, RequestSchema>
+): Promise<RequestType> => {
   const validated = opts.requestSchema.safeParse(opts.data)
   if (!validated.success) {
     return Promise.reject(invalidRequestError(reqCfgToReqInfo(opts))(validated.error))
@@ -46,10 +46,10 @@ const verifyRequestPayload = <Request, RequestSchema extends z.ZodType<Request>,
   }
 }
 
-const verifyResponsePayload = <Response, ResponseSchema extends z.ZodType<Response>>(
-  opts: RequestConfig<unknown> & ResponsePayloadConfig<Response, ResponseSchema>,
-  response: Response
-): Promise<Response> => {
+const verifyResponsePayload = <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
+  opts: RequestConfig<unknown> & ResponsePayloadConfig<ResponseType, ResponseSchema>,
+  response: ResponseType
+): Promise<ResponseType> => {
   const validated = opts.responseSchema.safeParse(response)
   if (!validated.success) {
     return Promise.reject(invalidResponseError(reqCfgToReqInfo(opts))(validated.error))
@@ -63,7 +63,9 @@ const verifyResponsePayload = <Response, ResponseSchema extends z.ZodType<Respon
  *
  * @param opts request options
  */
-export const doRequest = <Request, Response>(opts: RequestConfig<Request>): Promise<AxiosResponse<Response, Request>> =>
+export const doRequest = <RequestType, ResponseType>(
+  opts: RequestConfig<RequestType>
+): Promise<AxiosResponse<ResponseType, RequestType>> =>
   axios({
     validateStatus: (status) => status < 300,
     ...opts,
@@ -75,8 +77,8 @@ export const doRequest = <Request, Response>(opts: RequestConfig<Request>): Prom
  *
  * @param opts request options
  */
-export const sendOnly = <Request, RequestSchema extends z.ZodType<Request>>(
-  opts: RequestConfig<Request> & RequestPayloadConfig<Request, RequestSchema>
+export const sendOnly = <RequestType, RequestSchema extends z.ZodType<RequestType>>(
+  opts: RequestConfig<RequestType> & RequestPayloadConfig<RequestType, RequestSchema>
 ): Promise<void> => verifyRequestPayload(opts).then(() => void doRequest(opts))
 
 /**
@@ -84,9 +86,10 @@ export const sendOnly = <Request, RequestSchema extends z.ZodType<Request>>(
  *
  * @param opts request options
  */
-export const receiveOnly = <Response, ResponseSchema extends z.ZodType<Response>>(
-  opts: RequestConfig<undefined> & ResponsePayloadConfig<Response, ResponseSchema>
-): Promise<Response> => doRequest<undefined, Response>(opts).then((result) => verifyResponsePayload(opts, result.data))
+export const receiveOnly = <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
+  opts: RequestConfig<undefined> & ResponsePayloadConfig<ResponseType, ResponseSchema>
+): Promise<ResponseType> =>
+  doRequest<undefined, ResponseType>(opts).then((result) => verifyResponsePayload(opts, result.data))
 
 /**
  * Performs a request with request and response body validation.
@@ -94,15 +97,15 @@ export const receiveOnly = <Response, ResponseSchema extends z.ZodType<Response>
  * @param opts request options
  */
 export const sendAndReceive = <
-  Request,
-  RequestSchema extends z.ZodType<Request>,
-  Response,
-  ResponseSchema extends z.ZodType<Response>
+  RequestType,
+  RequestSchema extends z.ZodType<RequestType>,
+  ResponseType,
+  ResponseSchema extends z.ZodType<ResponseType>
 >(
-  opts: RequestConfig<Request> &
-    RequestPayloadConfig<Request, RequestSchema> &
-    ResponsePayloadConfig<Response, ResponseSchema>
-): Promise<Response> =>
+  opts: RequestConfig<RequestType> &
+    RequestPayloadConfig<RequestType, RequestSchema> &
+    ResponsePayloadConfig<ResponseType, ResponseSchema>
+): Promise<ResponseType> =>
   verifyRequestPayload(opts)
-    .then(() => doRequest<Request, Response>(opts))
+    .then(() => doRequest<RequestType, ResponseType>(opts))
     .then((result) => verifyResponsePayload(opts, result.data))

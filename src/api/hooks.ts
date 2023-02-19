@@ -1,47 +1,7 @@
-import {
-  QueryKey,
-  useMutation,
-  UseMutationOptions,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-  UseQueryResult
-} from 'react-query'
+import { QueryKey, useMutation, useQuery, useQueryClient } from 'react-query'
+import { UseApiMutationOptions, UseApiMutationResult, UseApiQueryOptions, UseApiQueryResult } from './types'
 import { RequestError, toApiError } from './errors'
-import { QueryFunctionContext } from 'react-query/types/core/types'
-import { RequestDefinition } from './types'
 import { reqDefToReqInfo } from './utils'
-
-export type UseApiQueryAdditionalOptions<TQueryFnData, TData, TQueryKey extends QueryKey = QueryKey> = Readonly<
-  Omit<UseQueryOptions<TQueryFnData, RequestError, TData, TQueryKey>, 'queryKey' | 'queryFn'>
->
-
-export type UseApiMutationAdditionalOptions<TData, TVariables, TContext = unknown> = Readonly<
-  Omit<UseMutationOptions<TData, RequestError, TVariables, TContext>, 'mutationFn'>
->
-
-export type UseApiQueryOptions<
-  TQueryFnData,
-  TData,
-  TQueryKey extends QueryKey = QueryKey
-> = UseApiQueryAdditionalOptions<TQueryFnData, TData, TQueryKey> &
-  Readonly<{
-    request: RequestDefinition
-    queryFn: (request: RequestDefinition, context: Readonly<QueryFunctionContext<TQueryKey>>) => Promise<TQueryFnData>
-    queryKey: TQueryKey
-  }>
-
-export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = UseApiMutationAdditionalOptions<
-  TData,
-  TVariables,
-  TContext
-> &
-  Readonly<{
-    request: RequestDefinition
-    mutationFn: (request: RequestDefinition, variables: TVariables) => Promise<TData>
-    invalidateQueries?: ReadonlyArray<QueryKey>
-  }>
 
 /**
  * Query request hook (this request result may be cached because we don't expect any data mutations with it)
@@ -51,7 +11,7 @@ export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = UseAp
  */
 export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey>({
   ...opts
-}: UseApiQueryOptions<TQueryFnData, TData, TQueryKey>): UseQueryResult<TData, RequestError> =>
+}: UseApiQueryOptions<TQueryFnData, TData, TQueryKey>): UseApiQueryResult<TData> =>
   useQuery({
     ...opts,
     queryFn: async (context) => {
@@ -77,7 +37,7 @@ export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQuery
 export const useApiMutation = <TData, TVariables, TContext = unknown>({
   invalidateQueries,
   ...opts
-}: UseApiMutationOptions<TData, TVariables, TContext>): UseMutationResult<TData, RequestError, TVariables> => {
+}: UseApiMutationOptions<TData, TVariables, TContext>): UseApiMutationResult<TData, TVariables> => {
   const queryClient = useQueryClient()
 
   return useMutation<TData, RequestError, TVariables, TContext>({
