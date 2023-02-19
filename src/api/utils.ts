@@ -1,84 +1,89 @@
 import * as z from 'zod'
-import { HttpMethod } from './types'
-import axios, { AxiosRequestConfig } from 'axios'
-import { evaluate, MaybeLazy } from '@digital-magic/ts-common-utils'
+import axios, { AxiosResponse } from 'axios'
+import { evaluate } from '@digital-magic/ts-common-utils'
 import { invalidRequestError, invalidResponseError } from './errors'
-
-type RequestConfig<Response> = Readonly<
-  Omit<AxiosRequestConfig<Response>, 'method' | 'url'> & {
-    url: MaybeLazy<string>
-    method: HttpMethod
-  }
->
+import { ErrorRequestConfig, RequestConfig } from './types'
 
 type RequestPayloadConfig<Request, RequestSchema extends z.ZodType<Request>> = Readonly<{
-  bodySchema: RequestSchema
+  requestSchema: RequestSchema
 }>
 
 type ResponsePayloadConfig<Response, ResponseSchema extends z.ZodType<Response>> = Readonly<{
   responseSchema: ResponseSchema
 }>
 
+export const reqCfgToErrReqCfg = (config: RequestConfig<unknown>): ErrorRequestConfig => ({
+  ...config,
+  url: evaluate(config.url)
+})
+
 const verifyRequestPayload = <Request, RequestSchema extends z.ZodType<Request>, Response>(
   opts: RequestConfig<Response> & RequestPayloadConfig<Request, RequestSchema>
 ): Promise<Request> => {
-  const validated = opts.bodySchema.safeParse(opts.data)
+  const validated = opts.requestSchema.safeParse(opts.data)
   if (!validated.success) {
-    return Promise.reject(invalidRequestError({ ...opts, url: evaluate(opts.url) })(validated.error))
+    return Promise.reject(invalidRequestError(reqCfgToErrReqCfg(opts))(validated.error))
   } else {
     return Promise.resolve(validated.data)
   }
 }
 
-const verifyResponsePayload =
-  <Response, ResponseSchema extends z.ZodType<Response>>(
-    opts: RequestConfig<Response> & ResponsePayloadConfig<Response, ResponseSchema>
-  ) =>
-  (response: Response): Promise<Response> => {
-    const validated = opts.responseSchema.safeParse(response)
-    if (!validated.success) {
-      return Promise.reject(invalidResponseError({ ...opts, url: evaluate(opts.url) })(validated.error))
-    } else {
-      return Promise.resolve(validated.data)
-    }
+const verifyResponsePayload = <Response, ResponseSchema extends z.ZodType<Response>>(
+  opts: ResponsePayloadConfig<Response, ResponseSchema> & RequestConfig<unknown>,
+  response: Response
+): Promise<Response> => {
+  const validated = opts.responseSchema.safeParse(response)
+  if (!validated.success) {
+    return Promise.reject(invalidResponseError(reqCfgToErrReqCfg(opts))(validated.error))
+  } else {
+    return Promise.resolve(validated.data)
   }
+}
 
 /**
- * Performs Axios request with some additional type guards.
+ * Performs Axios request.
  *
- * @param url request URL or lazy function that returns such URL
- * @param opts other request options
+ * @param opts request options
  */
-export const doRequest = <Data>({ url, ...opts }: RequestConfig<Data>): Promise<Data> =>
+export const doRequest = <Request, Response>(opts: RequestConfig<Request>): Promise<AxiosResponse<Response, Request>> =>
   axios({
     validateStatus: (status) => status < 300,
-    url: evaluate(url),
-    ...opts
+    ...reqCfgToErrReqCfg(opts)
   })
 
 /**
- * Performs request with request body validation.
+ * Performs a request that doesn't return a response with request body validation.
  *
- * @param opts request & request body options
+ * @param opts request options
  */
 export const sendOnly = <Request, RequestSchema extends z.ZodType<Request>>(
-  opts: RequestConfig<never> & RequestPayloadConfig<Request, RequestSchema>
-): Promise<void> => verifyRequestPayload(opts).then(() => doRequest(opts))
+  opts: RequestConfig<Request> & RequestPayloadConfig<Request, RequestSchema>
+): Promise<void> => verifyRequestPayload(opts).then(() => void doRequest(opts))
 
+/**
+ * Performs a request without a request body with response body validation.
+ *
+ * @param opts request options
+ */
 export const receiveOnly = <Response, ResponseSchema extends z.ZodType<Response>>(
-  opts: RequestConfig<Response> & ResponsePayloadConfig<Response, ResponseSchema>
-): Promise<Response> => doRequest(opts).then(verifyResponsePayload(opts))
+  opts: RequestConfig<undefined> & ResponsePayloadConfig<Response, ResponseSchema>
+): Promise<Response> => doRequest<undefined, Response>(opts).then((result) => verifyResponsePayload(opts, result.data))
 
+/**
+ * Performs a request with request and response body validation.
+ *
+ * @param opts request options
+ */
 export const sendAndReceive = <
   Request,
   RequestSchema extends z.ZodType<Request>,
   Response,
   ResponseSchema extends z.ZodType<Response>
 >(
-  opts: RequestConfig<Response> &
+  opts: RequestConfig<Request> &
     RequestPayloadConfig<Request, RequestSchema> &
     ResponsePayloadConfig<Response, ResponseSchema>
 ): Promise<Response> =>
   verifyRequestPayload(opts)
-    .then(() => doRequest(opts))
-    .then(verifyResponsePayload(opts))
+    .then(() => doRequest<Request, Response>(opts))
+    .then((result) => verifyResponsePayload(opts, result.data))
