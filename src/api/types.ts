@@ -1,15 +1,17 @@
-import * as z from 'zod'
-import { AxiosRequestConfig } from 'axios'
+import { AxiosRequestConfig, Method } from 'axios'
 import { MaybeLazy } from '@digital-magic/ts-common-utils'
+import { NonOptional } from '@digital-magic/ts-common-utils/lib/type'
 
-export const HttpMethod = z.enum(['get', 'post', 'put', 'patch', 'delete'])
-export type HttpMethod = z.infer<typeof HttpMethod>
+export type RequestDefinition<T> = Readonly<{
+  method: Method
+  url: MaybeLazy<NonOptional<AxiosRequestConfig['url']>>
+  params: AxiosRequestConfig['params']
+  data: AxiosRequestConfig<T>['data']
+}>
 
-export type ErrorRequestConfig = Readonly<AxiosRequestConfig<unknown>>
-
-export type RequestConfig<Request> = Readonly<
-  Omit<AxiosRequestConfig<Request>, 'method' | 'url'> & {
-    url: MaybeLazy<string>
-    method: HttpMethod
-  }
->
+export type RequestContext = Readonly<{
+  method: Method
+  url: NonOptional<AxiosRequestConfig['url']>
+  params: AxiosRequestConfig['params']
+  data: AxiosRequestConfig<unknown>['data']
+}>

@@ -10,8 +10,8 @@ import {
 } from 'react-query'
 import { RequestError, toApiError } from './errors'
 import { QueryFunctionContext } from 'react-query/types/core/types'
-import { RequestConfig } from './types'
-import { reqCfgToErrReqCfg } from './utils'
+import { RequestDefinition } from './types'
+import { reqDefToReqInfo } from './utils'
 
 export type UseApiQueryAdditionalOptions<TQueryFnData, TData, TQueryKey extends QueryKey = QueryKey> = Readonly<
   Omit<UseQueryOptions<TQueryFnData, RequestError, TData, TQueryKey>, 'queryKey' | 'queryFn'>
@@ -27,9 +27,12 @@ export type UseApiQueryOptions<
   TQueryKey extends QueryKey = QueryKey
 > = UseApiQueryAdditionalOptions<TQueryFnData, TData, TQueryKey> &
   Readonly<{
-    queryFn: (config: RequestConfig<TData>, context: Readonly<QueryFunctionContext<TQueryKey>>) => Promise<TQueryFnData>
+    request: RequestDefinition<TData>
+    queryFn: (
+      request: RequestDefinition<TData>,
+      context: Readonly<QueryFunctionContext<TQueryKey>>
+    ) => Promise<TQueryFnData>
     queryKey: TQueryKey
-    config: RequestConfig<TData>
   }>
 
 export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = UseApiMutationAdditionalOptions<
@@ -38,9 +41,9 @@ export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = UseAp
   TContext
 > &
   Readonly<{
-    mutationFn: (config: RequestConfig<TData>, variables: TVariables) => Promise<TData>
+    request: RequestDefinition<TData>
+    mutationFn: (request: RequestDefinition<TData>, variables: TVariables) => Promise<TData>
     invalidateQueries?: ReadonlyArray<QueryKey>
-    config: RequestConfig<TData>
   }>
 
 /**
@@ -57,12 +60,12 @@ export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQuery
     queryFn: async (context) => {
       // eslint-disable-next-line functional/no-try-statements
       try {
-        return await opts.queryFn(opts.config, context)
+        return await opts.queryFn(opts.request, context)
       } catch (e) {
         // TODO: Remove it eventually
         // eslint-disable-next-line no-console
         console.error(e)
-        throw toApiError(reqCfgToErrReqCfg(opts.config))(e)
+        throw toApiError(reqDefToReqInfo(opts.request))(e)
       }
     }
   })
@@ -85,12 +88,12 @@ export const useApiMutation = <TData, TVariables, TContext = unknown>({
     mutationFn: async (args) => {
       // eslint-disable-next-line functional/no-try-statements
       try {
-        return await opts.mutationFn(opts.config, args)
+        return await opts.mutationFn(opts.request, args)
       } catch (e) {
         // TODO: Remove it eventually
         // eslint-disable-next-line no-console
         console.error(e)
-        throw toApiError(reqCfgToErrReqCfg(opts.config))(e)
+        throw toApiError(reqDefToReqInfo(opts.request))(e)
       }
     },
     // eslint-disable-next-line functional/functional-parameters

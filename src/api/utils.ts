@@ -1,8 +1,15 @@
 import * as z from 'zod'
-import axios, { AxiosResponse } from 'axios'
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { evaluate } from '@digital-magic/ts-common-utils'
 import { invalidRequestError, invalidResponseError } from './errors'
-import { ErrorRequestConfig, RequestConfig } from './types'
+import { RequestDefinition, RequestContext } from './types'
+
+type RequestConfig<Request> = Readonly<
+  Omit<AxiosRequestConfig<Request>, 'method' | 'url'> & {
+    url: RequestDefinition<Request>['url']
+    method: RequestDefinition<Request>['method']
+  }
+>
 
 type RequestPayloadConfig<Request, RequestSchema extends z.ZodType<Request>> = Readonly<{
   requestSchema: RequestSchema
@@ -12,9 +19,20 @@ type ResponsePayloadConfig<Response, ResponseSchema extends z.ZodType<Response>>
   responseSchema: ResponseSchema
 }>
 
-export const reqCfgToErrReqCfg = (config: RequestConfig<unknown>): ErrorRequestConfig => ({
-  ...config,
-  url: evaluate(config.url)
+const reqCfgToReqInfo = (config: RequestConfig<unknown>): RequestContext => ({
+  url: evaluate(config.url),
+  method: config.method,
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  params: config.params,
+  data: config.data
+})
+
+export const reqDefToReqInfo = (config: RequestDefinition<unknown>): RequestContext => ({
+  url: evaluate(config.url),
+  method: config.method,
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  params: config.params,
+  data: config.data
 })
 
 const verifyRequestPayload = <Request, RequestSchema extends z.ZodType<Request>, Response>(
@@ -22,19 +40,19 @@ const verifyRequestPayload = <Request, RequestSchema extends z.ZodType<Request>,
 ): Promise<Request> => {
   const validated = opts.requestSchema.safeParse(opts.data)
   if (!validated.success) {
-    return Promise.reject(invalidRequestError(reqCfgToErrReqCfg(opts))(validated.error))
+    return Promise.reject(invalidRequestError(reqCfgToReqInfo(opts))(validated.error))
   } else {
     return Promise.resolve(validated.data)
   }
 }
 
 const verifyResponsePayload = <Response, ResponseSchema extends z.ZodType<Response>>(
-  opts: ResponsePayloadConfig<Response, ResponseSchema> & RequestConfig<unknown>,
+  opts: RequestConfig<unknown> & ResponsePayloadConfig<Response, ResponseSchema>,
   response: Response
 ): Promise<Response> => {
   const validated = opts.responseSchema.safeParse(response)
   if (!validated.success) {
-    return Promise.reject(invalidResponseError(reqCfgToErrReqCfg(opts))(validated.error))
+    return Promise.reject(invalidResponseError(reqCfgToReqInfo(opts))(validated.error))
   } else {
     return Promise.resolve(validated.data)
   }
@@ -48,7 +66,8 @@ const verifyResponsePayload = <Response, ResponseSchema extends z.ZodType<Respon
 export const doRequest = <Request, Response>(opts: RequestConfig<Request>): Promise<AxiosResponse<Response, Request>> =>
   axios({
     validateStatus: (status) => status < 300,
-    ...reqCfgToErrReqCfg(opts)
+    ...opts,
+    url: evaluate(opts.url)
   })
 
 /**

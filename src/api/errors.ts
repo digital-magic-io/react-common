@@ -3,19 +3,19 @@ import { AppError, ErrorDetailsRecord, UnknownError, unknownError } from '../err
 import { AxiosError, isAxiosError } from 'axios'
 import { OptionalType } from '@digital-magic/ts-common-utils'
 import { buildErrorMessage } from '../errors/utils'
-import { ErrorRequestConfig } from './types'
-const errorCtxToDetails = (config: ErrorRequestConfig): ErrorDetailsRecord => ({
-  method: config.method,
-  url: config.url,
-  params: JSON.stringify(config.params),
-  data: JSON.stringify(config.data)
+import { RequestContext } from './types'
+const buildErrorDetails = (context: RequestContext): ErrorDetailsRecord => ({
+  method: context.method,
+  url: context.url,
+  params: JSON.stringify(context.params),
+  data: JSON.stringify(context.data)
 })
 
 const buildFailedRequestError = (
   errorName: string,
-  config: ErrorRequestConfig,
+  context: RequestContext,
   details: Record<string, OptionalType<string | number>>
-): string => buildErrorMessage(errorName, { ...errorCtxToDetails(config), ...details })
+): string => buildErrorMessage(errorName, { ...buildErrorDetails(context), ...details })
 
 // TODO: Make it polymorphic?
 const ApiErrorObject = z.object({
@@ -25,39 +25,39 @@ const ApiErrorObject = z.object({
 })
 type ApiErrorObject = Readonly<z.infer<typeof ApiErrorObject>>
 
-export type ErrorWithRequestConfig = Readonly<{
-  config: ErrorRequestConfig
+export type ErrorWithRequestContext = Readonly<{
+  context: RequestContext
 }>
 
 export const ApiError = 'ApiError'
 export type ApiError = AppError<typeof ApiError> &
-  ErrorWithRequestConfig &
+  ErrorWithRequestContext &
   Readonly<{
     payload: ApiErrorObject
   }>
 
 export const apiError =
-  (config: ErrorRequestConfig) =>
+  (context: RequestContext) =>
   (payload: ApiErrorObject): ApiError => ({
     name: ApiError,
-    message: buildFailedRequestError(ApiError, config, { payload: JSON.stringify(payload) }),
-    config: config,
+    message: buildFailedRequestError(ApiError, context, { payload: JSON.stringify(payload) }),
+    context,
     payload
   })
 
 export const HttpError = 'HttpError'
 export type HttpError = AppError<typeof HttpError> &
-  ErrorWithRequestConfig &
+  ErrorWithRequestContext &
   Readonly<{
     httpStatus?: number
     axiosError: AxiosError<unknown, unknown>
   }>
 export const httpError =
-  (config: ErrorRequestConfig) =>
+  (context: RequestContext) =>
   (error: Readonly<AxiosError<unknown, unknown>>): HttpError => ({
     name: HttpError,
-    message: buildFailedRequestError(HttpError, config, { status: error.status, message: error.message }),
-    config: config,
+    message: buildFailedRequestError(HttpError, context, { status: error.status, message: error.message }),
+    context,
     httpStatus: error.status,
     axiosError: error
   })
@@ -67,25 +67,25 @@ type WithZodError<T> = Readonly<{
 }>
 
 export const InvalidRequestError = 'InvalidRequestError'
-export type InvalidRequestError<T> = AppError<typeof InvalidRequestError> & ErrorWithRequestConfig & WithZodError<T>
+export type InvalidRequestError<T> = AppError<typeof InvalidRequestError> & ErrorWithRequestContext & WithZodError<T>
 
 export const invalidRequestError =
-  (config: ErrorRequestConfig) =>
+  (context: RequestContext) =>
   <T>(error: Readonly<z.ZodError<T>>): InvalidRequestError<T> => ({
     name: InvalidRequestError,
-    message: buildFailedRequestError(InvalidRequestError, config, { message: error.message }),
-    config: config,
+    message: buildFailedRequestError(InvalidRequestError, context, { message: error.message }),
+    context,
     error
   })
 
 export const InvalidResponseError = 'InvalidResponseError'
-export type InvalidResponseError<T> = AppError<typeof InvalidResponseError> & ErrorWithRequestConfig & WithZodError<T>
+export type InvalidResponseError<T> = AppError<typeof InvalidResponseError> & ErrorWithRequestContext & WithZodError<T>
 export const invalidResponseError =
-  (config: ErrorRequestConfig) =>
+  (context: RequestContext) =>
   <T>(error: Readonly<z.ZodError<T>>): InvalidResponseError<T> => ({
     name: InvalidResponseError,
-    message: buildFailedRequestError(InvalidResponseError, config, { message: error.message }),
-    config: config,
+    message: buildFailedRequestError(InvalidResponseError, context, { message: error.message }),
+    context,
     error
   })
 
@@ -99,24 +99,24 @@ export type RequestErrorType =
 export type RequestError = AppError<RequestErrorType>
 
 export const toApiError =
-  (config: ErrorRequestConfig) =>
+  (context: RequestContext) =>
   (e: unknown): RequestError => {
     if (isAxiosError(e)) {
       if (e.response?.data) {
         const errorObj = ApiErrorObject.safeParse(e.response.data)
         if (errorObj.success) {
-          return apiError(config)(errorObj.data)
+          return apiError(context)(errorObj.data)
         } else {
-          return httpError(config)(e)
+          return httpError(context)(e)
         }
       } else {
-        return httpError(config)(e)
+        return httpError(context)(e)
       }
     } else {
       if (e instanceof Error) {
-        return unknownError(buildFailedRequestError(UnknownError, config, { message: e.message }))
+        return unknownError(buildFailedRequestError(UnknownError, context, { message: e.message }))
       } else {
-        return unknownError(buildFailedRequestError(UnknownError, config, { error: JSON.stringify(e) }))
+        return unknownError(buildFailedRequestError(UnknownError, context, { error: JSON.stringify(e) }))
       }
     }
   }
