@@ -27,11 +27,8 @@ export type UseApiQueryOptions<
   TQueryKey extends QueryKey = QueryKey
 > = UseApiQueryAdditionalOptions<TQueryFnData, TData, TQueryKey> &
   Readonly<{
-    request: RequestDefinition<TData>
-    queryFn: (
-      request: RequestDefinition<TData>,
-      context: Readonly<QueryFunctionContext<TQueryKey>>
-    ) => Promise<TQueryFnData>
+    request: RequestDefinition
+    queryFn: (request: RequestDefinition, context: Readonly<QueryFunctionContext<TQueryKey>>) => Promise<TQueryFnData>
     queryKey: TQueryKey
   }>
 
@@ -41,8 +38,8 @@ export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = UseAp
   TContext
 > &
   Readonly<{
-    request: RequestDefinition<TData>
-    mutationFn: (request: RequestDefinition<TData>, variables: TVariables) => Promise<TData>
+    request: RequestDefinition
+    mutationFn: (request: RequestDefinition, variables: TVariables) => Promise<TData>
     invalidateQueries?: ReadonlyArray<QueryKey>
   }>
 
@@ -65,7 +62,7 @@ export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQuery
         // TODO: Remove it eventually
         // eslint-disable-next-line no-console
         console.error(e)
-        throw toApiError(reqDefToReqInfo(opts.request))(e)
+        throw toApiError(reqDefToReqInfo(opts.request, undefined))(e)
       }
     }
   })
@@ -93,7 +90,7 @@ export const useApiMutation = <TData, TVariables, TContext = unknown>({
         // TODO: Remove it eventually
         // eslint-disable-next-line no-console
         console.error(e)
-        throw toApiError(reqDefToReqInfo(opts.request))(e)
+        throw toApiError(reqDefToReqInfo(opts.request, args))(e)
       }
     },
     // eslint-disable-next-line functional/functional-parameters

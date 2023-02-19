@@ -6,8 +6,8 @@ import { RequestDefinition, RequestContext } from './types'
 
 type RequestConfig<Request> = Readonly<
   Omit<AxiosRequestConfig<Request>, 'method' | 'url'> & {
-    url: RequestDefinition<Request>['url']
-    method: RequestDefinition<Request>['method']
+    url: RequestDefinition['url']
+    method: RequestDefinition['method']
   }
 >
 
@@ -27,12 +27,12 @@ const reqCfgToReqInfo = (config: RequestConfig<unknown>): RequestContext => ({
   data: config.data
 })
 
-export const reqDefToReqInfo = (config: RequestDefinition<unknown>): RequestContext => ({
+export const reqDefToReqInfo = (config: RequestDefinition, data: unknown): RequestContext => ({
   url: evaluate(config.url),
   method: config.method,
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   params: config.params,
-  data: config.data
+  data
 })
 
 const verifyRequestPayload = <Request, RequestSchema extends z.ZodType<Request>, Response>(
