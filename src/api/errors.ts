@@ -103,7 +103,7 @@ export type RequestError = AppError<RequestErrorType>
 
 export const toApiError =
   (action: string) =>
-  (e: Readonly<Error>): RequestError => {
+  (e: unknown): RequestError => {
     if (isAxiosError(e)) {
       if (e.response?.data && hasValue(e.config)) {
         const errorObj = ApiErrorObject.safeParse(e.response.data)
@@ -116,6 +116,10 @@ export const toApiError =
         return httpError(e.config)(e)
       }
     } else {
-      return unknownError(buildErrorMessage(UnknownError, { action, message: e.message }))
+      if (e instanceof Error) {
+        return unknownError(buildErrorMessage(UnknownError, { action, message: e.message }))
+      } else {
+        return unknownError(buildErrorMessage(UnknownError, { action, error: JSON.stringify(e) }))
+      }
     }
   }
