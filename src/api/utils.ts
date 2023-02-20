@@ -1,17 +1,9 @@
+/* eslint-disable functional/prefer-immutable-types */
 import * as z from 'zod'
-import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { evaluate } from '@digital-magic/ts-common-utils'
 import { type RequestDefinition, type RequestContext } from './types'
-import {
-  apiError,
-  ApiErrorObject,
-  buildFailedRequestError,
-  httpError,
-  invalidRequestError,
-  invalidResponseError,
-  RequestError
-} from './errors'
-import { UnknownError, unknownError } from '../errors'
+import { invalidRequestError, invalidResponseError } from './errors'
 
 type RequestConfig<RequestType> = Readonly<
   Omit<AxiosRequestConfig<RequestType>, 'method' | 'url'> & {
@@ -70,55 +62,62 @@ const verifyResponsePayload = <ResponseType, ResponseSchema extends z.ZodType<Re
 /**
  * Performs Axios request.
  *
- * @param opts request options
  */
-export const doRequest = <RequestType, ResponseType>(
-  opts: RequestConfig<RequestType>
-): Promise<AxiosResponse<ResponseType, RequestType>> =>
-  axios({
-    validateStatus: (status) => status < 300,
-    ...opts,
-    url: evaluate(opts.url)
-  })
+export const doRequest =
+  (axios: AxiosInstance) =>
+  <RequestType, ResponseType>(opts: RequestConfig<RequestType>): Promise<AxiosResponse<ResponseType, RequestType>> =>
+    axios({
+      validateStatus: (status) => status < 300,
+      ...opts,
+      url: evaluate(opts.url)
+    })
 
 /**
  * Performs a request that doesn't return a response with request body validation.
  *
- * @param opts request options
+ * @param axios AxiosInstance
  */
-export const sendOnly = <RequestType, RequestSchema extends z.ZodType<RequestType>>(
-  opts: RequestConfig<RequestType> & RequestPayloadConfig<RequestType, RequestSchema>
-): Promise<void> => verifyRequestPayload(opts).then(() => void doRequest(opts))
+export const sendOnly =
+  (axios: AxiosInstance) =>
+  <RequestType, RequestSchema extends z.ZodType<RequestType>>(
+    opts: RequestConfig<RequestType> & RequestPayloadConfig<RequestType, RequestSchema>
+  ): Promise<void> =>
+    verifyRequestPayload(opts).then(() => void doRequest(axios)(opts))
 
 /**
  * Performs a request without a request body with response body validation.
  *
- * @param opts request options
+ * @param axios AxiosInstance
  */
-export const receiveOnly = <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
-  opts: RequestConfig<undefined> & ResponsePayloadConfig<ResponseType, ResponseSchema>
-): Promise<ResponseType> =>
-  doRequest<undefined, ResponseType>(opts).then((result) => verifyResponsePayload(opts, result.data))
+export const receiveOnly =
+  (axios: AxiosInstance) =>
+  <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
+    opts: RequestConfig<undefined> & ResponsePayloadConfig<ResponseType, ResponseSchema>
+  ): Promise<ResponseType> =>
+    doRequest(axios)<undefined, ResponseType>(opts).then((result) => verifyResponsePayload(opts, result.data))
 
 /**
  * Performs a request with request and response body validation.
  *
- * @param opts request options
+ * @param axios AxiosInstance
  */
-export const sendAndReceive = <
-  RequestType,
-  RequestSchema extends z.ZodType<RequestType>,
-  ResponseType,
-  ResponseSchema extends z.ZodType<ResponseType>
->(
-  opts: RequestConfig<RequestType> &
-    RequestPayloadConfig<RequestType, RequestSchema> &
-    ResponsePayloadConfig<ResponseType, ResponseSchema>
-): Promise<ResponseType> =>
-  verifyRequestPayload(opts)
-    .then(() => doRequest<RequestType, ResponseType>(opts))
-    .then((result) => verifyResponsePayload(opts, result.data))
+export const sendAndReceive =
+  (axios: AxiosInstance) =>
+  <
+    RequestType,
+    RequestSchema extends z.ZodType<RequestType>,
+    ResponseType,
+    ResponseSchema extends z.ZodType<ResponseType>
+  >(
+    opts: RequestConfig<RequestType> &
+      RequestPayloadConfig<RequestType, RequestSchema> &
+      ResponsePayloadConfig<ResponseType, ResponseSchema>
+  ): Promise<ResponseType> =>
+    verifyRequestPayload(opts)
+      .then(() => doRequest(axios)<RequestType, ResponseType>(opts))
+      .then((result) => verifyResponsePayload(opts, result.data))
 
+/*
 export const toApiError =
   (context: RequestContext) =>
   (e: unknown): RequestError => {
@@ -141,3 +140,4 @@ export const toApiError =
       }
     }
   }
+*/

@@ -1,6 +1,7 @@
 import { QueryKey, useMutation, useQuery, useQueryClient } from 'react-query'
 import { UseApiMutationOptions, UseApiMutationResult, UseApiQueryOptions, UseApiQueryResult } from './types'
-import { reqDefToReqInfo, toApiError } from './utils'
+import { reqDefToReqInfo } from './utils'
+import { createUseApiError } from './errors'
 
 /**
  * Query request hook (this request result may be cached because we don't expect any data mutations with it)
@@ -21,7 +22,7 @@ export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQuery
         // TODO: Remove it eventually
         // eslint-disable-next-line no-console
         console.error(e)
-        throw toApiError(reqDefToReqInfo(opts.request, undefined))(e)
+        throw createUseApiError(reqDefToReqInfo(opts.request, undefined))(e)
       }
     }
   })
@@ -49,7 +50,8 @@ export const useApiMutation = <TData, TVariables, TContext = unknown>({
         // TODO: Remove it eventually
         // eslint-disable-next-line no-console
         console.error(e)
-        throw toApiError(reqDefToReqInfo(opts.request, args))(e)
+        //throw toApiError(reqDefToReqInfo(opts.request, args))(e)
+        throw createUseApiError(reqDefToReqInfo(opts.request, args))(e)
       }
     },
     // eslint-disable-next-line functional/functional-parameters

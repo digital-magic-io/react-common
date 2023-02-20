@@ -29,6 +29,18 @@ export type ErrorWithRequestContext = Readonly<{
   context: RequestContext
 }>
 
+export const UseApiError = 'UseApiError'
+export type UseApiError = AppError<typeof UseApiError> & ErrorWithRequestContext
+
+export const createUseApiError =
+  (context: RequestContext) =>
+  (error: unknown): UseApiError => ({
+    name: UseApiError,
+    message: buildFailedRequestError(UseApiError, context, { error: JSON.stringify(error) }),
+    context,
+    cause: error
+  })
+
 export const ApiError = 'ApiError'
 export type ApiError = AppError<typeof ApiError> &
   ErrorWithRequestContext &
