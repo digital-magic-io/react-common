@@ -1,9 +1,16 @@
 import * as z from 'zod'
-import { type AxiosError } from 'axios'
+import { type AxiosError, isAxiosError } from 'axios'
 import { OptionalType } from '@digital-magic/ts-common-utils'
 import { buildErrorMessage } from '../errors/utils'
 import { RequestContext } from './types'
-import { AppError, ClientErrorPlainText, ClientErrorTranslation, ErrorDetailsRecord, UnknownError } from '../errors'
+import {
+  AppError,
+  ClientErrorPlainText,
+  ClientErrorTranslation,
+  ErrorDetailsRecord,
+  unknownError,
+  UnknownError
+} from '../errors'
 const buildErrorDetails = (context: RequestContext): ErrorDetailsRecord => ({
   method: context.method,
   url: context.url,
@@ -29,14 +36,14 @@ export type ErrorWithRequestContext = Readonly<{
   context: RequestContext
 }>
 
-export const UseApiError = 'UseApiError'
-export type UseApiError = AppError<typeof UseApiError> & ErrorWithRequestContext
+export const CommunicationError = 'CommunicationError'
+export type CommunicationError = AppError<typeof CommunicationError> & ErrorWithRequestContext
 
-export const createUseApiError =
+export const communicationError =
   (context: RequestContext) =>
-  (error: unknown): UseApiError => ({
-    name: UseApiError,
-    message: buildFailedRequestError(UseApiError, context, { error: JSON.stringify(error) }),
+  (error: Readonly<Error>): CommunicationError => ({
+    name: CommunicationError,
+    message: buildFailedRequestError(CommunicationError, context, { error: JSON.stringify(error.message) }),
     context,
     cause: error
   })
@@ -61,7 +68,7 @@ export const HttpError = 'HttpError'
 export type HttpError = AppError<typeof HttpError> &
   ErrorWithRequestContext &
   Readonly<{
-    httpStatus?: number
+    httpStatus: OptionalType<number>
     axiosError: AxiosError<unknown, unknown>
   }>
 export const httpError =
@@ -103,10 +110,41 @@ export const invalidResponseError =
 
 export type RequestError =
   | UnknownError
-  | ApiError
-  | HttpError
   | InvalidRequestError<unknown>
   | InvalidResponseError<unknown>
+  | CommunicationError
+  | HttpError
+  | ApiError
+
+export const buildRequestError =
+  (context: RequestContext) =>
+  (e: unknown): RequestError => {
+    if (isAxiosError(e)) {
+      if (e.response?.data) {
+        const errorObj = ApiErrorObject.safeParse(e.response.data)
+        if (errorObj.success) {
+          return apiError(context)(errorObj.data)
+        } else {
+          return httpError(context)(e)
+        }
+      } else {
+        return httpError(context)(e)
+      }
+    } else {
+      if (e instanceof Error) {
+        // TODO: Not sure that InvalidRequestError/InvalidResponseError are needed here, because generally are thrown outside the request handling
+        if (e.name === InvalidRequestError) {
+          return e as InvalidRequestError<unknown>
+        } else if (e.name === InvalidResponseError) {
+          return e as InvalidResponseError<unknown>
+        } else {
+          return communicationError(context)(e)
+        }
+      } else {
+        return unknownError(e, context)
+      }
+    }
+  }
 
 export const clientRequestErrorPlainText = (
   message: string,

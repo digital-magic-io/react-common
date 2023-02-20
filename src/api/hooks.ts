@@ -1,7 +1,30 @@
 import { QueryKey, useMutation, useQuery, useQueryClient } from 'react-query'
 import { UseApiMutationOptions, UseApiMutationResult, UseApiQueryOptions, UseApiQueryResult } from './types'
-import { createUseApiError } from './errors'
-import { reqDefToReqInfo } from './utils'
+import {
+  ApiError,
+  CommunicationError,
+  HttpError,
+  InvalidRequestError,
+  InvalidResponseError,
+  RequestError
+} from './errors'
+import { UnknownError, unknownError } from '../errors'
+
+const buildRequestError = (e: unknown, context: unknown): RequestError => {
+  if (e instanceof Error) {
+    if (
+      [UnknownError, InvalidRequestError, InvalidResponseError, CommunicationError, HttpError, ApiError].includes(
+        e.name
+      )
+    ) {
+      return e as RequestError
+    } else {
+      return unknownError(e, context)
+    }
+  } else {
+    return unknownError(e, context)
+  }
+}
 
 /**
  * Query request hook (this request result may be cached because we don't expect any data mutations with it)
@@ -17,12 +40,9 @@ export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQuery
     queryFn: async (context) => {
       // eslint-disable-next-line functional/no-try-statements
       try {
-        return await opts.queryFn(opts.request, context)
+        return await opts.queryFn(context)
       } catch (e) {
-        // TODO: Remove it eventually
-        // eslint-disable-next-line no-console
-        console.error(e)
-        throw createUseApiError(reqDefToReqInfo(opts.request, undefined))(e)
+        throw buildRequestError(e, context)
       }
     }
   })
@@ -45,13 +65,9 @@ export const useApiMutation = <TData, TVariables, TContext = unknown>({
     mutationFn: async (args) => {
       // eslint-disable-next-line functional/no-try-statements
       try {
-        return await opts.mutationFn(opts.request, args)
+        return await opts.mutationFn(args)
       } catch (e) {
-        // TODO: Remove it eventually
-        // eslint-disable-next-line no-console
-        console.error(e)
-        //throw toApiError(reqDefToReqInfo(opts.request, args))(e)
-        throw createUseApiError(reqDefToReqInfo(opts.request, args))(e)
+        throw buildRequestError(e, args)
       }
     },
     // eslint-disable-next-line functional/functional-parameters

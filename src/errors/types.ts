@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next'
 import { OptionalType } from '@digital-magic/ts-common-utils'
-import { buildBasicErrorMessage } from './utils'
+import { buildErrorMessage } from './utils'
 
 export type ErrorDetailValue = OptionalType<string | number>
 export type ErrorDetailsRecord = Readonly<Record<string, ErrorDetailValue>>
@@ -12,10 +12,10 @@ export type AppError<T extends string = string> = Error &
 
 export const UnknownError = 'UnknownError'
 export type UnknownError = AppError<typeof UnknownError>
-export const unknownError = (action: string): UnknownError => ({
+export const unknownError = (e: unknown, context?: unknown): UnknownError => ({
   name: UnknownError,
-  message: buildBasicErrorMessage(UnknownError, action),
-  cause: undefined
+  message: buildErrorMessage(UnknownError, { error: JSON.stringify(e), context: JSON.stringify(context) }),
+  cause: e
 })
 
 export const ClientErrorPlainText = 'ClientErrorPlainText'
