@@ -73,7 +73,7 @@ const doRequest =
 /**
  * Performs a request without a request body that doesn't return a response
  */
-export const callOnly =
+export const doCallOnly =
   (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   (opts: RequestConfig<void>): Promise<void> =>
     doRequest(axios, buildError)(opts).then(() => Promise.resolve())
@@ -81,7 +81,7 @@ export const callOnly =
 /**
  * Performs a request that doesn't return a response with request body validation.
  */
-export const sendOnly =
+export const doSendOnly =
   (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   <RequestType, RequestSchema extends z.ZodType<RequestType>>(
     opts: RequestConfig<RequestType> & RequestPayloadConfig<RequestType, RequestSchema>
@@ -91,7 +91,7 @@ export const sendOnly =
 /**
  * Performs a request without a request body with response body validation.
  */
-export const receiveOnly =
+export const doReceiveOnly =
   (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
     opts: RequestConfig<undefined> & ResponsePayloadConfig<ResponseType, ResponseSchema>
@@ -104,7 +104,7 @@ export const receiveOnly =
 /**
  * Performs a request with request and response body validation.
  */
-export const sendAndReceive =
+export const doSendAndReceive =
   (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   <
     RequestType,
