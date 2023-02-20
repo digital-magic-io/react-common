@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import { type AxiosError, isAxiosError } from 'axios'
+import { type AxiosError } from 'axios'
 import { OptionalType } from '@digital-magic/ts-common-utils'
 import { buildErrorMessage } from '../errors/utils'
 import { RequestContext } from './types'
@@ -116,9 +116,12 @@ export type RequestError =
   | HttpError
   | ApiError
 
+export type RequestErrorBuilder = (context: RequestContext) => (e: unknown) => RequestError
+
 export const buildRequestError =
-  (context: RequestContext) =>
-  (e: unknown): RequestError => {
+  (isAxiosError: (payload: unknown) => payload is AxiosError): RequestErrorBuilder =>
+  (context) =>
+  (e) => {
     if (isAxiosError(e)) {
       if (e.response?.data) {
         const errorObj = ApiErrorObject.safeParse(e.response.data)

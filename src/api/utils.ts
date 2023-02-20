@@ -3,7 +3,7 @@ import * as z from 'zod'
 import { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { evaluate } from '@digital-magic/ts-common-utils'
 import { type RequestDefinition, type RequestContext } from './types'
-import { buildRequestError, invalidRequestError, invalidResponseError } from './errors'
+import { invalidRequestError, invalidResponseError, type RequestErrorBuilder } from './errors'
 
 type RequestConfig<RequestType> = Readonly<
   Omit<AxiosRequestConfig<RequestType>, 'method' | 'url'> & {
@@ -59,12 +59,8 @@ const verifyResponsePayload = <ResponseType, ResponseSchema extends z.ZodType<Re
   }
 }
 
-/**
- * Performs Axios request.
- *
- */
-export const doRequest =
-  (axios: AxiosInstance, buildError: typeof buildRequestError = buildRequestError) =>
+const doRequest =
+  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   <RequestType, ResponseType>(opts: RequestConfig<RequestType>): Promise<AxiosResponse<ResponseType, RequestType>> =>
     axios({
       validateStatus: (status) => status < 300,
@@ -74,8 +70,11 @@ export const doRequest =
       return Promise.reject(buildError(reqDefToReqInfo(opts, opts.data))(e))
     })
 
+/**
+ * Performs a request without a request body that doesn't return a response
+ */
 export const callOnly =
-  (axios: AxiosInstance, buildError: typeof buildRequestError = buildRequestError) =>
+  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   (opts: RequestConfig<void>): Promise<void> =>
     doRequest(axios, buildError)(opts).then(() => Promise.resolve())
 
@@ -83,7 +82,7 @@ export const callOnly =
  * Performs a request that doesn't return a response with request body validation.
  */
 export const sendOnly =
-  (axios: AxiosInstance, buildError: typeof buildRequestError = buildRequestError) =>
+  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   <RequestType, RequestSchema extends z.ZodType<RequestType>>(
     opts: RequestConfig<RequestType> & RequestPayloadConfig<RequestType, RequestSchema>
   ): Promise<void> =>
@@ -93,7 +92,7 @@ export const sendOnly =
  * Performs a request without a request body with response body validation.
  */
 export const receiveOnly =
-  (axios: AxiosInstance, buildError: typeof buildRequestError = buildRequestError) =>
+  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
     opts: RequestConfig<undefined> & ResponsePayloadConfig<ResponseType, ResponseSchema>
   ): Promise<ResponseType> =>
@@ -106,7 +105,7 @@ export const receiveOnly =
  * Performs a request with request and response body validation.
  */
 export const sendAndReceive =
-  (axios: AxiosInstance, buildError: typeof buildRequestError = buildRequestError) =>
+  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
   <
     RequestType,
     RequestSchema extends z.ZodType<RequestType>,
