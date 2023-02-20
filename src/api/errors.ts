@@ -89,14 +89,12 @@ export const invalidResponseError =
     error
   })
 
-export type RequestErrorType =
-  | typeof UnknownError
-  | typeof ApiError
-  | typeof HttpError
-  | typeof InvalidRequestError
-  | typeof InvalidResponseError
-
-export type RequestError = AppError<RequestErrorType>
+export type RequestError =
+  | UnknownError
+  | ApiError
+  | HttpError
+  | InvalidRequestError<unknown>
+  | InvalidResponseError<unknown>
 
 export const toApiError =
   (context: RequestContext) =>
