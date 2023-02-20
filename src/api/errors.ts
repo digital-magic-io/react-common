@@ -1,9 +1,9 @@
 import * as z from 'zod'
-import { AppError, ErrorDetailsRecord, UnknownError } from '../errors'
 import { type AxiosError } from 'axios'
 import { OptionalType } from '@digital-magic/ts-common-utils'
 import { buildErrorMessage } from '../errors/utils'
 import { RequestContext } from './types'
+import { AppError, ClientErrorPlainText, ClientErrorTranslation, ErrorDetailsRecord, UnknownError } from '../errors'
 const buildErrorDetails = (context: RequestContext): ErrorDetailsRecord => ({
   method: context.method,
   url: context.url,
@@ -107,3 +107,27 @@ export type RequestError =
   | HttpError
   | InvalidRequestError<unknown>
   | InvalidResponseError<unknown>
+
+export const clientRequestErrorPlainText = (
+  message: string,
+  requestError: Readonly<RequestError>
+): ClientErrorPlainText => ({
+  name: ClientErrorPlainText,
+  cause: requestError,
+  message
+})
+
+export const clientRequestErrorTranslation = (
+  message: string,
+  requestError: Readonly<RequestError>,
+  // eslint-disable-next-line functional/prefer-immutable-types
+  messageKey: ClientErrorTranslation['messageKey'],
+  // eslint-disable-next-line functional/prefer-immutable-types
+  messageOpts?: ClientErrorTranslation['messageOpts']
+): ClientErrorTranslation => ({
+  name: ClientErrorTranslation,
+  cause: requestError,
+  message,
+  messageKey,
+  messageOpts
+})

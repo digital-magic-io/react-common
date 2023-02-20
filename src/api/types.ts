@@ -2,14 +2,15 @@ import { type AxiosRequestConfig, type Method } from 'axios'
 import {
   QueryFunctionContext,
   QueryKey,
+  QueryKeyHashFunction,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from 'react-query'
 import { MaybeLazy, NonOptional } from '@digital-magic/ts-common-utils'
-import { type UseApiError } from './errors'
-import { QueryKeyHashFunction } from 'react-query/types/core/types'
+import { ClientError } from '../errors'
+import { RequestError, type UseApiError } from './errors'
 
 export type RequestDefinition = Readonly<{
   method: Method
@@ -71,3 +72,4 @@ export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = Reado
 
 export type UseApiQueryResult<TData> = UseQueryResult<TData, UseApiError>
 export type UseApiMutationResult<TData, TVariables> = UseMutationResult<TData, UseApiError, TVariables>
+export type RequestErrorMapper = (err: Readonly<RequestError>) => ClientError

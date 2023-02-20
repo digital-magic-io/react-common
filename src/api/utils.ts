@@ -116,28 +116,3 @@ export const sendAndReceive =
     verifyRequestPayload(opts)
       .then(() => doRequest(axios)<RequestType, ResponseType>(opts))
       .then((result) => verifyResponsePayload(opts, result.data))
-
-/*
-export const toApiError =
-  (context: RequestContext) =>
-  (e: unknown): RequestError => {
-    if (axios.isAxiosError(e)) {
-      if (e.response?.data) {
-        const errorObj = ApiErrorObject.safeParse(e.response.data)
-        if (errorObj.success) {
-          return apiError(context)(errorObj.data)
-        } else {
-          return httpError(context)(e)
-        }
-      } else {
-        return httpError(context)(e)
-      }
-    } else {
-      if (e instanceof Error) {
-        return unknownError(buildFailedRequestError(UnknownError, context, { message: e.message }))
-      } else {
-        return unknownError(buildFailedRequestError(UnknownError, context, { error: JSON.stringify(e) }))
-      }
-    }
-  }
-*/

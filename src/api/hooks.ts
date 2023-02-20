@@ -1,7 +1,7 @@
 import { QueryKey, useMutation, useQuery, useQueryClient } from 'react-query'
 import { UseApiMutationOptions, UseApiMutationResult, UseApiQueryOptions, UseApiQueryResult } from './types'
-import { reqDefToReqInfo } from './utils'
 import { createUseApiError } from './errors'
+import { reqDefToReqInfo } from './utils'
 
 /**
  * Query request hook (this request result may be cached because we don't expect any data mutations with it)
