@@ -1,6 +1,6 @@
 import { QueryKey, useMutation, useQuery, useQueryClient } from 'react-query'
 import { UseApiMutationOptions, UseApiMutationResult, UseApiQueryOptions, UseApiQueryResult } from './types'
-import { RequestError, toApiError } from './errors'
+import { toApiError } from './errors'
 import { reqDefToReqInfo } from './utils'
 
 /**
@@ -40,7 +40,7 @@ export const useApiMutation = <TData, TVariables, TContext = unknown>({
 }: UseApiMutationOptions<TData, TVariables, TContext>): UseApiMutationResult<TData, TVariables> => {
   const queryClient = useQueryClient()
 
-  return useMutation<TData, RequestError, TVariables, TContext>({
+  return useMutation({
     ...opts,
     mutationFn: async (args) => {
       // eslint-disable-next-line functional/no-try-statements

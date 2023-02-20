@@ -32,11 +32,9 @@ export type UseApiMutationAdditionalOptions<TData, TVariables, TContext = unknow
   Omit<UseMutationOptions<TData, RequestError, TVariables, TContext>, 'mutationFn'>
 >
 
-export type UseApiQueryOptions<
-  TQueryFnData,
-  TData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey
-> = UseApiQueryAdditionalOptions<TQueryFnData, TData> &
+export type UseApiQueryOptions<TQueryFnData, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey> = Readonly<
+  Omit<UseQueryOptions<TQueryFnData, RequestError, TData, TQueryKey>, 'queryKey' | 'queryFn' | 'queryKeyHashFn'>
+> &
   Readonly<{
     request: RequestDefinition
     queryFn: (request: RequestDefinition, context: Readonly<QueryFunctionContext<TQueryKey>>) => Promise<TQueryFnData>
@@ -44,10 +42,8 @@ export type UseApiQueryOptions<
     queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
   }>
 
-export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = UseApiMutationAdditionalOptions<
-  TData,
-  TVariables,
-  TContext
+export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = Readonly<
+  Omit<UseMutationOptions<TData, RequestError, TVariables, TContext>, 'mutationFn'>
 > &
   Readonly<{
     request: RequestDefinition
