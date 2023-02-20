@@ -1,6 +1,6 @@
 import * as z from 'zod'
-import { AppError, ErrorDetailsRecord, UnknownError, unknownError } from '../errors'
-import axios, { type AxiosError } from 'axios'
+import { AppError, ErrorDetailsRecord, UnknownError } from '../errors'
+import { type AxiosError } from 'axios'
 import { OptionalType } from '@digital-magic/ts-common-utils'
 import { buildErrorMessage } from '../errors/utils'
 import { RequestContext } from './types'
@@ -11,19 +11,19 @@ const buildErrorDetails = (context: RequestContext): ErrorDetailsRecord => ({
   data: JSON.stringify(context.data)
 })
 
-const buildFailedRequestError = (
+export const buildFailedRequestError = (
   errorName: string,
   context: RequestContext,
   details: Record<string, OptionalType<string | number>>
 ): string => buildErrorMessage(errorName, { ...buildErrorDetails(context), ...details })
 
 // TODO: Make it polymorphic?
-const ApiErrorObject = z.object({
+export const ApiErrorObject = z.object({
   caseId: z.string().nullable(),
   code: z.string(), //ApiErrorCode,
   message: z.string().nullable()
 })
-type ApiErrorObject = Readonly<z.infer<typeof ApiErrorObject>>
+export type ApiErrorObject = Readonly<z.infer<typeof ApiErrorObject>>
 
 export type ErrorWithRequestContext = Readonly<{
   context: RequestContext
@@ -95,26 +95,3 @@ export type RequestError =
   | HttpError
   | InvalidRequestError<unknown>
   | InvalidResponseError<unknown>
-
-export const toApiError =
-  (context: RequestContext) =>
-  (e: unknown): RequestError => {
-    if (axios.isAxiosError(e)) {
-      if (e.response?.data) {
-        const errorObj = ApiErrorObject.safeParse(e.response.data)
-        if (errorObj.success) {
-          return apiError(context)(errorObj.data)
-        } else {
-          return httpError(context)(e)
-        }
-      } else {
-        return httpError(context)(e)
-      }
-    } else {
-      if (e instanceof Error) {
-        return unknownError(buildFailedRequestError(UnknownError, context, { message: e.message }))
-      } else {
-        return unknownError(buildFailedRequestError(UnknownError, context, { error: JSON.stringify(e) }))
-      }
-    }
-  }

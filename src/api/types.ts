@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, Method } from 'axios'
+import { type AxiosRequestConfig, type Method } from 'axios'
 import {
   QueryFunctionContext,
   QueryKey,

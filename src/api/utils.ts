@@ -1,8 +1,17 @@
 import * as z from 'zod'
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { evaluate } from '@digital-magic/ts-common-utils'
-import { invalidRequestError, invalidResponseError } from './errors'
-import { RequestDefinition, RequestContext } from './types'
+import { type RequestDefinition, type RequestContext } from './types'
+import {
+  apiError,
+  ApiErrorObject,
+  buildFailedRequestError,
+  httpError,
+  invalidRequestError,
+  invalidResponseError,
+  RequestError
+} from './errors'
+import { UnknownError, unknownError } from '../errors'
 
 type RequestConfig<RequestType> = Readonly<
   Omit<AxiosRequestConfig<RequestType>, 'method' | 'url'> & {
@@ -109,3 +118,26 @@ export const sendAndReceive = <
   verifyRequestPayload(opts)
     .then(() => doRequest<RequestType, ResponseType>(opts))
     .then((result) => verifyResponsePayload(opts, result.data))
+
+export const toApiError =
+  (context: RequestContext) =>
+  (e: unknown): RequestError => {
+    if (axios.isAxiosError(e)) {
+      if (e.response?.data) {
+        const errorObj = ApiErrorObject.safeParse(e.response.data)
+        if (errorObj.success) {
+          return apiError(context)(errorObj.data)
+        } else {
+          return httpError(context)(e)
+        }
+      } else {
+        return httpError(context)(e)
+      }
+    } else {
+      if (e instanceof Error) {
+        return unknownError(buildFailedRequestError(UnknownError, context, { message: e.message }))
+      } else {
+        return unknownError(buildFailedRequestError(UnknownError, context, { error: JSON.stringify(e) }))
+      }
+    }
+  }
