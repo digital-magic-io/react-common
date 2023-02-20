@@ -1,6 +1,6 @@
 import * as z from 'zod'
 import { AppError, ErrorDetailsRecord, UnknownError, unknownError } from '../errors'
-import { AxiosError, isAxiosError } from 'axios'
+import axios, { type AxiosError } from 'axios'
 import { OptionalType } from '@digital-magic/ts-common-utils'
 import { buildErrorMessage } from '../errors/utils'
 import { RequestContext } from './types'
@@ -99,7 +99,7 @@ export type RequestError =
 export const toApiError =
   (context: RequestContext) =>
   (e: unknown): RequestError => {
-    if (isAxiosError(e)) {
+    if (axios.isAxiosError(e)) {
       if (e.response?.data) {
         const errorObj = ApiErrorObject.safeParse(e.response.data)
         if (errorObj.success) {

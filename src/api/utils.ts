@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { evaluate } from '@digital-magic/ts-common-utils'
 import { invalidRequestError, invalidResponseError } from './errors'
 import { RequestDefinition, RequestContext } from './types'
