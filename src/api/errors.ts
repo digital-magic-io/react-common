@@ -68,9 +68,9 @@ export const httpError =
   (context: RequestContext) =>
   (error: Readonly<AxiosError<unknown, unknown>>): HttpError => ({
     name: HttpError,
-    message: buildFailedRequestError(HttpError, context, { status: error.status, message: error.message }),
+    message: buildFailedRequestError(HttpError, context, { status: error.response?.status, message: error.message }),
     context,
-    httpStatus: error.status,
+    httpStatus: error.response?.status,
     axiosError: error
   })
 
