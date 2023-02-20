@@ -24,13 +24,32 @@ export type RequestContext = Readonly<{
   data: AxiosRequestConfig<unknown>['data']
 }>
 
-export type UseApiQueryAdditionalOptions<TQueryFnData, TData = TQueryFnData> = Readonly<
-  Omit<UseQueryOptions<TQueryFnData, RequestError, TData>, 'queryKey' | 'queryFn' | 'queryKeyHashFn'>
->
+// eslint-disable-next-line functional/no-mixed-types
+export type UseApiQueryAdditionalOptions<TData> = Readonly<{
+  enabled?: boolean
+  onSuccess?: (data: TData) => void
+  onError?: (err: Readonly<RequestError>) => void
+  suspense?: boolean
+  keepPreviousData?: boolean
+  optimisticResults?: boolean
+}>
 
-export type UseApiMutationAdditionalOptions<TData, TVariables, TContext = unknown> = Readonly<
-  Omit<UseMutationOptions<TData, RequestError, TVariables, TContext>, 'mutationFn'>
->
+export type UseApiMutationAdditionalOptions<TData, TVariables, TContext = unknown> = Readonly<{
+  onMutate?: (variables: TVariables) => Promise<TContext | undefined> | TContext | undefined
+  onSuccess?: (data: TData, variables: TVariables, context: TContext | undefined) => Promise<unknown> | void
+  onError?: (
+    error: Readonly<RequestError>,
+    variables: TVariables,
+    context: TContext | undefined
+  ) => Promise<unknown> | void
+  onSettled?: (
+    data: TData | undefined,
+    error: Readonly<RequestError> | null,
+    variables: TVariables,
+    context: TContext | undefined
+  ) => Promise<unknown> | void
+  //Omit<UseMutationOptions<TData, RequestError, TVariables, TContext>, 'mutationFn'>
+}>
 
 export type UseApiQueryOptions<TQueryFnData, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey> = Readonly<
   Omit<UseQueryOptions<TQueryFnData, RequestError, TData, TQueryKey>, 'queryKey' | 'queryFn' | 'queryKeyHashFn'>
