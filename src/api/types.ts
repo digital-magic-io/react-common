@@ -48,7 +48,6 @@ export type UseApiMutationAdditionalOptions<TData, TVariables, TContext = unknow
     variables: TVariables,
     context: TContext | undefined
   ) => Promise<unknown> | void
-  //Omit<UseMutationOptions<TData, RequestError, TVariables, TContext>, 'mutationFn'>
 }>
 
 export type UseApiQueryOptions<TQueryFnData, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey> = Readonly<
