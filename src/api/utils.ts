@@ -119,3 +119,18 @@ export const doSendAndReceive =
     verifyRequestPayload(opts)
       .then(() => doRequest(axios, buildError)<RequestType, ResponseType>(opts))
       .then((result) => verifyResponsePayload(opts, result.data))
+
+export const doSendFile =
+  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  (opts: RequestConfig<FormData>): Promise<void> =>
+    doRequest(axios, buildError)(opts).then(() => Promise.resolve())
+
+export const doSendFileAndReceive =
+  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
+    opts: RequestConfig<FormData> & ResponsePayloadConfig<ResponseType, ResponseSchema>
+  ): Promise<ResponseType> =>
+    doRequest(
+      axios,
+      buildError
+    )<FormData, ResponseType>(opts).then((result) => verifyResponsePayload(opts, result.data))
