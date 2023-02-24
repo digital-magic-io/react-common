@@ -13,14 +13,17 @@ export const OptionalStringToDate: z.ZodEffects<z.ZodOptionalType<z.ZodNullable<
   .string()
   .nullish()
   .transform((d) => (d ? new Date(d) : undefined))
+export type OptionalStringToDate = z.infer<typeof OptionalStringToDate>
 
 // transform date string to Date object
 export const StringToDate: z.ZodEffects<z.ZodString, Date> = z.string().transform((v) => new Date(v))
+export type StringToDate = z.infer<typeof StringToDate>
 
 export const BlobType = z
   .unknown()
   .refine((b) => b instanceof Blob)
   .transform((b) => b as Blob)
+export type BlobType = z.infer<typeof BlobType>
 
 // transform nullish (undefined or null) value to only undefined
 export const NullishToOptional = <Schema extends z.ZodType<unknown>>(

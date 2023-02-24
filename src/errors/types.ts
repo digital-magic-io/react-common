@@ -5,6 +5,7 @@ import { buildErrorMessage } from './utils'
 export type ErrorDetailValue = OptionalType<string | number>
 export type ErrorDetailsRecord = Readonly<Record<string, ErrorDetailValue>>
 
+// TODO: Update name to be unique symbol type
 export type AppError<T extends string = string> = Error &
   Readonly<{
     name: T

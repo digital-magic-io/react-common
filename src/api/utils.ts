@@ -60,7 +60,7 @@ const verifyResponsePayload = <ResponseType, ResponseSchema extends z.ZodType<Re
 }
 
 const doRequest =
-  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ApiErrorPayloadType>(axios: AxiosInstance, buildError: RequestErrorBuilder<ApiErrorPayloadType>) =>
   <RequestType, ResponseType>(opts: RequestConfig<RequestType>): Promise<AxiosResponse<ResponseType, RequestType>> =>
     axios({
       validateStatus: (status) => status < 300,
@@ -74,7 +74,7 @@ const doRequest =
  * Performs a request without a request body that doesn't return a response
  */
 export const doCallOnly =
-  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ApiErrorPayloadType>(axios: AxiosInstance, buildError: RequestErrorBuilder<ApiErrorPayloadType>) =>
   (opts: RequestConfig<void>): Promise<void> =>
     doRequest(axios, buildError)(opts).then(() => Promise.resolve())
 
@@ -82,7 +82,7 @@ export const doCallOnly =
  * Performs a request that doesn't return a response with request body validation.
  */
 export const doSendOnly =
-  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ApiErrorPayloadType>(axios: AxiosInstance, buildError: RequestErrorBuilder<ApiErrorPayloadType>) =>
   <RequestType, RequestSchema extends z.ZodType<RequestType>>(
     opts: RequestConfig<RequestType> & RequestPayloadConfig<RequestType, RequestSchema>
   ): Promise<void> =>
@@ -92,7 +92,7 @@ export const doSendOnly =
  * Performs a request without a request body with response body validation.
  */
 export const doReceiveOnly =
-  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ApiErrorPayloadType>(axios: AxiosInstance, buildError: RequestErrorBuilder<ApiErrorPayloadType>) =>
   <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
     opts: RequestConfig<undefined> & ResponsePayloadConfig<ResponseType, ResponseSchema>
   ): Promise<ResponseType> =>
@@ -105,7 +105,7 @@ export const doReceiveOnly =
  * Performs a request with request and response body validation.
  */
 export const doSendAndReceive =
-  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ApiErrorPayloadType>(axios: AxiosInstance, buildError: RequestErrorBuilder<ApiErrorPayloadType>) =>
   <
     RequestType,
     RequestSchema extends z.ZodType<RequestType>,
@@ -121,12 +121,12 @@ export const doSendAndReceive =
       .then((result) => verifyResponsePayload(opts, result.data))
 
 export const doSendFile =
-  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ApiErrorPayloadType>(axios: AxiosInstance, buildError: RequestErrorBuilder<ApiErrorPayloadType>) =>
   (opts: RequestConfig<FormData>): Promise<void> =>
     doRequest(axios, buildError)(opts).then(() => Promise.resolve())
 
 export const doSendFileAndReceive =
-  (axios: AxiosInstance, buildError: RequestErrorBuilder) =>
+  <ApiErrorPayloadType>(axios: AxiosInstance, buildError: RequestErrorBuilder<ApiErrorPayloadType>) =>
   <ResponseType, ResponseSchema extends z.ZodType<ResponseType>>(
     opts: RequestConfig<FormData> & ResponsePayloadConfig<ResponseType, ResponseSchema>
   ): Promise<ResponseType> =>

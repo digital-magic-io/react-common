@@ -10,14 +10,14 @@ import {
 } from './errors'
 import { UnknownError, unknownError } from '../errors'
 
-const buildRequestError = (e: unknown, context: unknown): RequestError => {
+const buildRequestError = <ApiErrorPayloadType>(e: unknown, context: unknown): RequestError<ApiErrorPayloadType> => {
   if (e instanceof Error) {
     if (
       [UnknownError, InvalidRequestError, InvalidResponseError, CommunicationError, HttpError, ApiError].includes(
         e.name
       )
     ) {
-      return e as RequestError
+      return e as RequestError<ApiErrorPayloadType>
     } else {
       return unknownError(e, context)
     }
@@ -32,9 +32,17 @@ const buildRequestError = (e: unknown, context: unknown): RequestError => {
  * @param action name of the action
  * @param opts request options
  */
-export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey>({
+export const useApiQuery = <
+  ApiErrorPayloadType,
+  TQueryFnData = unknown,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey
+>({
   ...opts
-}: UseApiQueryOptions<TQueryFnData, TData, TQueryKey>): UseApiQueryResult<TData> =>
+}: UseApiQueryOptions<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>): UseApiQueryResult<
+  ApiErrorPayloadType,
+  TData
+> =>
   useQuery({
     ...opts,
     queryFn: async (context) => {
@@ -42,7 +50,7 @@ export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQuery
       try {
         return await opts.queryFn(context)
       } catch (e) {
-        throw buildRequestError(e, context)
+        throw buildRequestError<ApiErrorPayloadType>(e, context)
       }
     }
   })
@@ -54,10 +62,14 @@ export const useApiQuery = <TQueryFnData = unknown, TData = TQueryFnData, TQuery
  * @param invalidateQueries list of QueryKeys that must be invalidated on success
  * @param opts request options
  */
-export const useApiMutation = <TData, TVariables, TContext = unknown>({
+export const useApiMutation = <ApiErrorPayloadType, TData, TVariables, TContext = unknown>({
   invalidateQueries,
   ...opts
-}: UseApiMutationOptions<TData, TVariables, TContext>): UseApiMutationResult<TData, TVariables> => {
+}: UseApiMutationOptions<ApiErrorPayloadType, TData, TVariables, TContext>): UseApiMutationResult<
+  ApiErrorPayloadType,
+  TData,
+  TVariables
+> => {
   const queryClient = useQueryClient()
 
   return useMutation({

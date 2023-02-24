@@ -8,7 +8,7 @@ import {
   UseQueryOptions,
   UseQueryResult
 } from 'react-query'
-import { MaybeLazy, NonOptional } from '@digital-magic/ts-common-utils'
+import { Handler, MaybeLazy, NonOptional } from '@digital-magic/ts-common-utils'
 import { ClientError } from '../errors'
 import { type RequestError } from './errors'
 
@@ -26,33 +26,41 @@ export type RequestContext = Readonly<{
 }>
 
 // eslint-disable-next-line functional/no-mixed-types
-export type UseApiQueryAdditionalOptions<TData> = Readonly<{
+export type UseApiQueryAdditionalOptions<ApiErrorPayloadType, TData> = Readonly<{
   enabled?: boolean
   onSuccess?: (data: TData) => void
-  onError?: (err: Readonly<RequestError>) => void
+  onError?: (err: Readonly<RequestError<ApiErrorPayloadType>>) => void
   suspense?: boolean
   keepPreviousData?: boolean
   optimisticResults?: boolean
 }>
 
-export type UseApiMutationAdditionalOptions<TData, TVariables, TContext = unknown> = Readonly<{
+export type UseApiMutationAdditionalOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<{
   onMutate?: (variables: TVariables) => Promise<TContext | undefined> | TContext | undefined
   onSuccess?: (data: TData, variables: TVariables, context: TContext | undefined) => Promise<unknown> | void
   onError?: (
-    error: Readonly<RequestError>,
+    error: Readonly<RequestError<ApiErrorPayloadType>>,
     variables: TVariables,
     context: TContext | undefined
   ) => Promise<unknown> | void
   onSettled?: (
     data: TData | undefined,
-    error: Readonly<RequestError> | null,
+    error: Readonly<RequestError<ApiErrorPayloadType>> | null,
     variables: TVariables,
     context: TContext | undefined
   ) => Promise<unknown> | void
 }>
 
-export type UseApiQueryOptions<TQueryFnData, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey> = Readonly<
-  Omit<UseQueryOptions<TQueryFnData, RequestError, TData, TQueryKey>, 'queryKey' | 'queryFn' | 'queryKeyHashFn'>
+export type UseApiQueryOptions<
+  ApiErrorPayloadType,
+  TQueryFnData,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey
+> = Readonly<
+  Omit<
+    UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey>,
+    'queryKey' | 'queryFn' | 'queryKeyHashFn'
+  >
 > &
   Readonly<{
     queryFn: (context: Readonly<QueryFunctionContext<TQueryKey>>) => Promise<TQueryFnData>
@@ -60,14 +68,19 @@ export type UseApiQueryOptions<TQueryFnData, TData = TQueryFnData, TQueryKey ext
     queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
   }>
 
-export type UseApiMutationOptions<TData, TVariables, TContext = unknown> = Readonly<
-  Omit<UseMutationOptions<TData, RequestError, TVariables, TContext>, 'mutationFn'>
+export type UseApiMutationOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<
+  Omit<UseMutationOptions<TData, RequestError<ApiErrorPayloadType>, TVariables, TContext>, 'mutationFn'>
 > &
   Readonly<{
     mutationFn: (variables: TVariables) => Promise<TData>
     invalidateQueries?: ReadonlyArray<QueryKey>
   }>
 
-export type UseApiQueryResult<TData> = UseQueryResult<TData, RequestError>
-export type UseApiMutationResult<TData, TVariables> = UseMutationResult<TData, RequestError, TVariables>
-export type RequestErrorMapper = (err: Readonly<RequestError>) => ClientError
+export type UseApiQueryResult<ApiErrorPayloadType, TData> = UseQueryResult<TData, RequestError<ApiErrorPayloadType>>
+export type UseApiMutationResult<ApiErrorPayloadType, TData, TVariables> = UseMutationResult<
+  TData,
+  RequestError<ApiErrorPayloadType>,
+  TVariables
+>
+export type RequestErrorHandler<ApiErrorPayloadType> = Handler<RequestError<ApiErrorPayloadType>>
+export type RequestErrorMapper = <ApiErrorPayloadType>(err: Readonly<RequestError<ApiErrorPayloadType>>) => ClientError

@@ -11,6 +11,7 @@ import {
   unknownError,
   UnknownError
 } from '../errors'
+
 const buildErrorDetails = (context: RequestContext): ErrorDetailsRecord => ({
   method: context.method,
   url: context.url,
@@ -24,13 +25,13 @@ export const buildFailedRequestError = (
   details: Record<string, OptionalType<string | number>>
 ): string => buildErrorMessage(errorName, { ...buildErrorDetails(context), ...details })
 
-// TODO: Make it polymorphic?
-export const ApiErrorObject = z.object({
-  caseId: z.string().nullable(),
-  code: z.string(), //ApiErrorCode,
-  message: z.string().nullable()
-})
-export type ApiErrorObject = Readonly<z.infer<typeof ApiErrorObject>>
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const ApiErrorObject = <T>(ApiErrorCode: Readonly<z.ZodType<T>>) =>
+  z.object({
+    caseId: z.string().nullable(),
+    code: ApiErrorCode,
+    message: z.string().nullable()
+  })
 
 export type ErrorWithRequestContext = Readonly<{
   context: RequestContext
@@ -48,20 +49,18 @@ export const communicationError =
     cause: error
   })
 
+export type DefaultPayloadType<T> = Readonly<{ payload: T }>
+
 export const ApiError = 'ApiError'
-export type ApiError = AppError<typeof ApiError> &
-  ErrorWithRequestContext &
-  Readonly<{
-    payload: ApiErrorObject
-  }>
+export type ApiError<PayloadType> = AppError<typeof ApiError> & ErrorWithRequestContext & PayloadType
 
 export const apiError =
   (context: RequestContext) =>
-  (payload: ApiErrorObject): ApiError => ({
+  <PayloadType>(payload: PayloadType): ApiError<PayloadType> => ({
     name: ApiError,
     message: buildFailedRequestError(ApiError, context, { payload: JSON.stringify(payload) }),
     context,
-    payload
+    ...payload
   })
 
 export const HttpError = 'HttpError'
@@ -108,23 +107,28 @@ export const invalidResponseError =
     error
   })
 
-export type RequestError =
+export type RequestError<ApiErrorPayloadType> =
   | UnknownError
   | InvalidRequestError<unknown>
   | InvalidResponseError<unknown>
   | CommunicationError
   | HttpError
-  | ApiError
+  | ApiError<ApiErrorPayloadType>
 
-export type RequestErrorBuilder = (context: RequestContext) => (e: unknown) => RequestError
+export type RequestErrorBuilder<ApiErrorPayloadType> = (
+  context: RequestContext
+) => (e: unknown) => RequestError<ApiErrorPayloadType>
 
 export const buildRequestError =
-  (isAxiosError: (payload: unknown) => payload is AxiosError): RequestErrorBuilder =>
+  <ApiErrorPayloadType>(
+    isAxiosError: (payload: unknown) => payload is AxiosError,
+    ApiErrorPayloadSchema: Readonly<z.ZodType<ApiErrorPayloadType>>
+  ): RequestErrorBuilder<ApiErrorPayloadType> =>
   (context) =>
   (e) => {
     if (isAxiosError(e)) {
       if (e.response?.data) {
-        const errorObj = ApiErrorObject.safeParse(e.response.data)
+        const errorObj = ApiErrorPayloadSchema.safeParse(e.response.data)
         if (errorObj.success) {
           return apiError(context)(errorObj.data)
         } else {
@@ -149,18 +153,18 @@ export const buildRequestError =
     }
   }
 
-export const clientRequestErrorPlainText = (
+export const clientRequestErrorPlainText = <ApiErrorPayloadType>(
   message: string,
-  requestError: Readonly<RequestError>
+  requestError: Readonly<RequestError<ApiErrorPayloadType>>
 ): ClientErrorPlainText => ({
   name: ClientErrorPlainText,
   cause: requestError,
   message
 })
 
-export const clientRequestErrorTranslation = (
+export const clientRequestErrorTranslation = <ApiErrorPayloadType>(
   message: string,
-  requestError: Readonly<RequestError>,
+  requestError: Readonly<RequestError<ApiErrorPayloadType>>,
   // eslint-disable-next-line functional/prefer-immutable-types
   messageKey: ClientErrorTranslation['messageKey'],
   // eslint-disable-next-line functional/prefer-immutable-types
