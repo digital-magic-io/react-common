@@ -82,5 +82,7 @@ export type UseApiMutationResult<ApiErrorPayloadType, TData, TVariables> = UseMu
   RequestError<ApiErrorPayloadType>,
   TVariables
 >
-export type RequestErrorHandler<ApiErrorPayloadType> = Handler<RequestError<ApiErrorPayloadType>>
-export type RequestErrorMapper<ApiErrorPayloadType> = (err: Readonly<RequestError<ApiErrorPayloadType>>) => ClientError
+export type GenericRequestErrorHandler<ApiErrorPayloadType> = Handler<RequestError<ApiErrorPayloadType>>
+export type GenericRequestErrorMapper<ApiErrorPayloadType> = (
+  err: Readonly<RequestError<ApiErrorPayloadType>>
+) => ClientError

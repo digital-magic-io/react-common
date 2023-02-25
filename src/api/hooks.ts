@@ -8,21 +8,24 @@ import {
   InvalidResponseError,
   RequestError
 } from './errors'
-import { UnknownError, unknownError } from '../errors'
+import { AppError, UnknownError, unknownError } from '../errors'
+
+export const isRequestError = <ApiErrorPayloadType>(e: unknown): e is RequestError<ApiErrorPayloadType> =>
+  Object.prototype.hasOwnProperty.call(e, 'name') &&
+  Object.prototype.hasOwnProperty.call(e, 'message') &&
+  [UnknownError, InvalidRequestError, InvalidResponseError, CommunicationError, HttpError, ApiError].includes(
+    (e as AppError<never>).name
+  )
 
 const buildRequestError = <ApiErrorPayloadType>(e: unknown, context: unknown): RequestError<ApiErrorPayloadType> => {
   if (e instanceof Error) {
-    if (
-      [UnknownError, InvalidRequestError, InvalidResponseError, CommunicationError, HttpError, ApiError].includes(
-        e.name
-      )
-    ) {
-      return e as RequestError<ApiErrorPayloadType>
+    return unknownError(e, context)
+  } else {
+    if (isRequestError<ApiErrorPayloadType>(e)) {
+      return e
     } else {
       return unknownError(e, context)
     }
-  } else {
-    return unknownError(e, context)
   }
 }
 
