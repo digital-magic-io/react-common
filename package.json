@@ -1,6 +1,6 @@
 {
   "name": "@digital-magic/react-common",
-  "version": "18.2.26",
+  "version": "18.2.27",
   "description": "Common types & utilities for strictly-typed React applications written with TS",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
