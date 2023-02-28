@@ -17,9 +17,6 @@ const buildRequestError = <ApiErrorPayloadType>(e: unknown, context: unknown): R
 
 /**
  * Query request hook (this request result may be cached because we don't expect any data mutations with it)
- *
- * @param action name of the action
- * @param opts request options
  */
 export const useApiQuery = <
   ApiErrorPayloadType,
@@ -46,10 +43,6 @@ export const useApiQuery = <
 
 /**
  * Mutation request hook (mutates data via API and can't be cached)
- *
- * @param action name of the action
- * @param invalidateQueries list of QueryKeys that must be invalidated on success
- * @param opts request options
  */
 export const useApiMutation = <ApiErrorPayloadType, TData, TVariables, TContext = unknown>({
   invalidateQueries,
