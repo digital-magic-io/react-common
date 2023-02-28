@@ -1,21 +1,7 @@
 import { QueryKey, useMutation, useQuery, useQueryClient } from 'react-query'
 import { UseApiMutationOptions, UseApiMutationResult, UseApiQueryOptions, UseApiQueryResult } from './types'
-import {
-  ApiError,
-  CommunicationError,
-  HttpError,
-  InvalidRequestError,
-  InvalidResponseError,
-  RequestError
-} from './errors'
-import { AppError, UnknownError, unknownError } from '../errors'
-
-export const isRequestError = <ApiErrorPayloadType>(e: unknown): e is RequestError<ApiErrorPayloadType> =>
-  Object.prototype.hasOwnProperty.call(e, 'name') &&
-  Object.prototype.hasOwnProperty.call(e, 'message') &&
-  [UnknownError, InvalidRequestError, InvalidResponseError, CommunicationError, HttpError, ApiError].includes(
-    (e as AppError<never>).name
-  )
+import { unknownError } from '../errors'
+import { isRequestError, RequestError } from './errors'
 
 const buildRequestError = <ApiErrorPayloadType>(e: unknown, context: unknown): RequestError<ApiErrorPayloadType> => {
   if (e instanceof Error) {
