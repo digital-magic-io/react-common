@@ -7,7 +7,7 @@ import {
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult
-} from 'react-query'
+} from '@tanstack/react-query'
 import { Handler, MaybeLazy, NonOptional } from '@digital-magic/ts-common-utils'
 import { ClientError } from '../errors'
 import { type RequestError } from './errors'

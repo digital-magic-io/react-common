@@ -1,4 +1,4 @@
-import { QueryKey, useMutation, useQuery, useQueryClient } from 'react-query'
+import { QueryKey, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { UseApiMutationOptions, UseApiMutationResult, UseApiQueryOptions, UseApiQueryResult } from './types'
 import { unknownError } from '../errors'
 import { isRequestError, RequestError } from './errors'
