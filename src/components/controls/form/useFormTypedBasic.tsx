@@ -22,7 +22,7 @@ export const useFormTypedBasic = <T extends FieldValues>(opts: UseFormTypedOptio
   const names = createProxy<DeepRequired<T>>()
 
   const f = useForm<T>({
-    mode: 'onChange',
+    mode: 'onBlur',
     ...opts,
     resolver: zodResolver(opts.resolver, { errorMap: opts.errorMap })
   })
