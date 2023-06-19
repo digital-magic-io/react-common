@@ -50,14 +50,13 @@ export const useApiQuery = <
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useApiHomogenousQueries = <
   ApiErrorPayloadType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TQueryFnData = unknown,
   TData = TQueryFnData //,
   //TQueryKey extends QueryKey = QueryKey
 >(
   optionsList: ReadonlyArray<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>>
 ) =>
-  useQueries<Array<QueriesOptions<Array<TQueryFnData>, Array<ApiErrorPayloadType>>>>({
+  useQueries<Array<QueriesOptions<Array<TQueryFnData>>>>({
     queries: optionsList.map((opts) => ({
       ...opts,
       queryFn: async (): Promise<TQueryFnData> => {

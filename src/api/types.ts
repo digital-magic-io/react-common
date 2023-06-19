@@ -4,7 +4,6 @@ import {
   QueryFunctionContext,
   QueryKey,
   QueryKeyHashFunction,
-  QueryObserverOptions,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -28,54 +27,30 @@ export type RequestContext = Readonly<{
 }>
 
 /*
-// eslint-disable-next-line functional/no-mixed-types
-export type UseApiQueryAdditionalOptions<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
-  Pick<
-    UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData>,
-    | 'enabled'
-    | 'onSuccess'
-    | 'onError'
-    | 'suspense'
-    | 'keepPreviousData'
-    | 'staleTime'
-    | 'refetchInterval'
-    | 'refetchOnMount'
-  >
->
-
-type UseQueryOptionsForUseQueries<
-  TQueryFnData = unknown,
-  TError = unknown,
+export type UseApiQueryAdditionalOptions<
+  ApiErrorPayloadType,
+  TQueryFnData,
   TData = TQueryFnData,
+  TQueryData = TQueryFnData,
   TQueryKey extends QueryKey = QueryKey
-> = Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'context'>
-
-export type UseApiQueriesAdditionalOptions<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
-  Pick<
-    UseQueryOptionsForUseQueries<TQueryFnData, RequestError<ApiErrorPayloadType>, TData>,
-    'enabled' | 'suspense' | 'keepPreviousData'
-  >
->
-export type UseApiMutationAdditionalOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<{
-  onMutate?: (variables: TVariables) => Promise<TContext | undefined> | TContext | undefined
-  onSuccess?: (data: TData, variables: TVariables, context: TContext | undefined) => Promise<unknown> | void
-  onError?: (
-    error: Readonly<RequestError<ApiErrorPayloadType>>,
-    variables: TVariables,
-    context: TContext | undefined
-  ) => Promise<unknown> | void
-  onSettled?: (
-    data: TData | undefined,
-    error: Readonly<RequestError<ApiErrorPayloadType>> | null,
-    variables: TVariables,
-    context: TContext | undefined
-  ) => Promise<unknown> | void
-}>
+> = Readonly<QueryObserverOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryData, TQueryKey>>
 */
 
-export type UseApiQueryAdditionalOptions<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
-  QueryObserverOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData>
->
+// eslint-disable-next-line functional/no-mixed-types
+export type UseApiQueryAdditionalOptions<ApiErrorPayloadType, TData> = Readonly<{
+  enabled?: boolean
+  onSuccess?: (data: TData) => void
+  onError?: (err: Readonly<RequestError<ApiErrorPayloadType>>) => void
+  suspense?: boolean
+  keepPreviousData?: boolean
+  optimisticResults?: boolean
+}>
+
+export type UseApiQueriesAdditionalOptions = Readonly<{
+  enabled?: boolean
+  suspense?: boolean
+  keepPreviousData?: boolean
+}>
 
 export type UseApiMutationAdditionalOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<
   Omit<UseMutationOptions<TData, RequestError<ApiErrorPayloadType>, TVariables, TContext>, 'mutationFn'>
