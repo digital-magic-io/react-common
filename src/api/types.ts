@@ -1,5 +1,6 @@
 import { type AxiosRequestConfig, type Method } from 'axios'
 import {
+  QueriesOptions,
   QueryFunctionContext,
   QueryKey,
   QueryKeyHashFunction,
@@ -64,6 +65,23 @@ export type UseApiQueryOptions<
 > &
   Readonly<{
     queryFn: (context: Readonly<QueryFunctionContext<TQueryKey>>) => Promise<TQueryFnData>
+    queryKey: TQueryKey
+    queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
+  }>
+
+export type UseApiQueryOptionsHomogenous<
+  ApiErrorPayloadType,
+  TQueryFnData,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey
+> = Readonly<
+  Omit<
+    QueriesOptions<Array<UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey>>>,
+    'queryKey' | 'queryFn' | 'queryKeyHashFn'
+  >
+> &
+  Readonly<{
+    queryFn: () => Promise<TQueryFnData>
     queryKey: TQueryKey
     queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
   }>
