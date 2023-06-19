@@ -54,7 +54,7 @@ export const useApiHomogenousQueries = <
   TData = TQueryFnData //,
   //TQueryKey extends QueryKey = QueryKey
 >(
-  optionsList: ReadonlyArray<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData, QueryKey>>
+  optionsList: ReadonlyArray<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>>
 ) =>
   useQueries<Array<UseQueryResult<TQueryFnData, ApiErrorPayloadType>>>({
     queries: optionsList.map((opts) => ({

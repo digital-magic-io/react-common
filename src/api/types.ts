@@ -69,21 +69,16 @@ export type UseApiQueryOptions<
     queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
   }>
 
-export type UseApiQueryOptionsHomogenous<
-  ApiErrorPayloadType,
-  TQueryFnData,
-  TData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey
-> = Readonly<
+export type UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
   Omit<
-    QueriesOptions<Array<UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey>>>,
+    QueriesOptions<Array<UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData>>>,
     'queryKey' | 'queryFn' | 'queryKeyHashFn'
   >
 > &
   Readonly<{
     queryFn: () => Promise<TQueryFnData>
-    queryKey: TQueryKey
-    queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
+    queryKey: QueryKey
+    queryKeyHashFn?: QueryKeyHashFunction<QueryKey>
   }>
 
 export type UseApiMutationOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<
