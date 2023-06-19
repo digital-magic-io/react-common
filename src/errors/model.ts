@@ -1,6 +1,6 @@
 import { buildErrorMessage, isAppError } from './utils'
 import { AppError } from './types'
-import { TFunction } from 'i18next'
+import { TFunction, TOptions } from 'i18next'
 import { RequestError } from '../api'
 
 export const UnknownError: unique symbol = Symbol('UnknownError')
@@ -35,7 +35,8 @@ export const ClientErrorTranslation: unique symbol = Symbol('ClientErrorTranslat
 export type ClientErrorTranslation = AppError<typeof ClientErrorTranslation> &
   Readonly<{
     messageKey: Parameters<TFunction>[0]
-    messageOpts?: Parameters<TFunction>[1]
+    // Unable to use Parameters<TFunction>[1] here, because TFunction has 2 overloads with 2 & 3 parameters
+    messageOpts?: TOptions
   }>
 
 export const clientRequestErrorTranslation = <ApiErrorPayloadType>(
