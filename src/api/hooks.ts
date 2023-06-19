@@ -1,4 +1,12 @@
-import { QueriesOptions, QueryKey, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  QueriesOptions,
+  QueriesResults,
+  QueryKey,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient
+} from '@tanstack/react-query'
 import {
   UseApiMutationOptions,
   UseApiMutationResult,
@@ -48,18 +56,13 @@ export const useApiQuery = <
   })
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const useApiHomogenousQueries = <
-  ApiErrorPayloadType,
-  TQueryFnData = unknown,
-  TData = TQueryFnData //,
-  //TQueryKey extends QueryKey = QueryKey
->(
+export const useApiHomogenousQueries = <ApiErrorPayloadType, TQueryFnData = unknown, TData = TQueryFnData>(
   optionsList: ReadonlyArray<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>>
-) =>
-  useQueries<Array<QueriesOptions<Array<TQueryFnData>>>>({
+): QueriesResults<Array<TQueryFnData>> =>
+  useQueries({
     queries: optionsList.map((opts) => ({
       ...opts,
-      queryFn: async (): Promise<TQueryFnData> => {
+      queryFn: async () => {
         // eslint-disable-next-line functional/no-try-statements
         try {
           return await opts.queryFn()
@@ -67,7 +70,7 @@ export const useApiHomogenousQueries = <
           throw buildRequestError<ApiErrorPayloadType>(e, undefined)
         }
       }
-    }))
+    })) as QueriesOptions<Array<TQueryFnData>>
   })
 
 /**
