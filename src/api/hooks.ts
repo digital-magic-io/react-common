@@ -71,7 +71,6 @@ const buildOptions = <
 ): UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey> => ({
   ...opts,
   queryFn: queryFunction<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>(opts)
-  //queryFn: queryFunction(opts)
 })
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -80,9 +79,9 @@ export const useApiHomogenousQueries = <
   TQueryFnData = unknown,
   TData = TQueryFnData,
   TQueryKey extends QueryKey = QueryKey
->({
-  ...optionsList
-}: Readonly<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>>) =>
+>(
+  optionsList: Readonly<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>>
+) =>
   useQueries<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>>({
     queries: optionsList.map(buildOptions)
   })
