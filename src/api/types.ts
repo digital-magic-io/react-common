@@ -1,6 +1,5 @@
 import { type AxiosRequestConfig, type Method } from 'axios'
 import {
-  QueriesOptions,
   QueryFunctionContext,
   QueryKey,
   QueryKeyHashFunction,
@@ -73,9 +72,27 @@ export type UseApiQueryOptions<
     queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
   }>
 
+/*
 export type UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
   Omit<
     QueriesOptions<Array<UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData>>>,
+    'queryKey' | 'queryFn' | 'queryKeyHashFn'
+  >
+> & {
+  queryFn: () => Promise<TQueryFnData>
+  queryKey: QueryKey
+  queryKeyHashFn?: QueryKeyHashFunction<QueryKey>
+}
+*/
+
+export type UseApiQueryOptionsItem<
+  ApiErrorPayloadType,
+  TQueryFnData,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey
+> = Readonly<
+  Omit<
+    UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey>,
     'queryKey' | 'queryFn' | 'queryKeyHashFn'
   >
 > &
@@ -84,6 +101,10 @@ export type UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TDat
     queryKey: QueryKey
     queryKeyHashFn?: QueryKeyHashFunction<QueryKey>
   }>
+
+export type UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
+  Array<UseApiQueryOptionsItem<ApiErrorPayloadType, TQueryFnData, TData>>
+>
 
 export type UseApiMutationOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<
   Omit<UseMutationOptions<TData, RequestError<ApiErrorPayloadType>, TVariables, TContext>, 'mutationFn'>

@@ -1,6 +1,7 @@
 import {
   QueriesOptions,
   QueriesResults,
+  QueryFunction,
   QueryKey,
   useMutation,
   useQueries,
@@ -12,6 +13,7 @@ import {
   UseApiMutationResult,
   UseApiQueryOptions,
   UseApiQueryOptionsHomogenous,
+  UseApiQueryOptionsItem,
   UseApiQueryResult
 } from './types'
 import { unknownError } from '../errors'
@@ -55,22 +57,35 @@ export const useApiQuery = <
     }
   })
 
+const queryFunction =
+  <ApiErrorPayloadType, TQueryFnData, TData>(
+    opts: UseApiQueryOptionsItem<ApiErrorPayloadType, TQueryFnData, TData>
+  ): QueryFunction<TQueryFnData> =>
+  async (context) => {
+    // eslint-disable-next-line functional/no-try-statements
+    try {
+      return await opts.queryFn()
+    } catch (e) {
+      throw buildRequestError<ApiErrorPayloadType>(e, context)
+    }
+  }
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const useApiHomogenousQueries = <ApiErrorPayloadType, TQueryFnData = unknown, TData = TQueryFnData>(
-  optionsList: ReadonlyArray<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>>
+export const useApiHomogenousQueries = <
+  ApiErrorPayloadType,
+  TQueryFnData = unknown,
+  TData = TQueryFnData
+  //TQueryKey extends QueryKey = QueryKey
+>(
+  optionsList: UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>
 ): QueriesResults<Array<TQueryFnData>> =>
   useQueries({
-    queries: optionsList.map((opts) => ({
-      ...opts,
-      queryFn: async () => {
-        // eslint-disable-next-line functional/no-try-statements
-        try {
-          return await opts.queryFn()
-        } catch (e) {
-          throw buildRequestError<ApiErrorPayloadType>(e, undefined)
-        }
-      }
-    })) as QueriesOptions<Array<TQueryFnData>>
+    queries: optionsList.map(
+      (opts /*: UseApiQueryOptionsItem<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>*/) => ({
+        ...opts,
+        queryFn: queryFunction<ApiErrorPayloadType, TQueryFnData, TData>(opts)
+      }) //as Omit<UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey>, 'context'>
+    ) as QueriesOptions<Array<TQueryFnData>>
   })
 
 /**
