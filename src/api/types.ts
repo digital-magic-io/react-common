@@ -25,16 +25,6 @@ export type RequestContext = Readonly<{
   data: AxiosRequestConfig<unknown>['data']
 }>
 
-/*
-export type UseApiQueryAdditionalOptions<
-  ApiErrorPayloadType,
-  TQueryFnData,
-  TData = TQueryFnData,
-  TQueryData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey
-> = Readonly<QueryObserverOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryData, TQueryKey>>
-*/
-
 // eslint-disable-next-line functional/no-mixed-types
 export type UseApiQueryAdditionalOptions<ApiErrorPayloadType, TData> = Readonly<{
   enabled?: boolean
@@ -72,38 +62,8 @@ export type UseApiQueryOptions<
     queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
   }>
 
-/*
 export type UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
-  Omit<
-    QueriesOptions<Array<UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData>>>,
-    'queryKey' | 'queryFn' | 'queryKeyHashFn'
-  >
-> & {
-  queryFn: () => Promise<TQueryFnData>
-  queryKey: QueryKey
-  queryKeyHashFn?: QueryKeyHashFunction<QueryKey>
-}
-*/
-
-export type UseApiQueryOptionsItem<
-  ApiErrorPayloadType,
-  TQueryFnData,
-  TData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey
-> = Readonly<
-  Omit<
-    UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey>,
-    'queryKey' | 'queryFn' | 'queryKeyHashFn'
-  >
-> &
-  Readonly<{
-    queryFn: () => Promise<TQueryFnData>
-    queryKey: QueryKey
-    queryKeyHashFn?: QueryKeyHashFunction<QueryKey>
-  }>
-
-export type UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
-  Array<UseApiQueryOptionsItem<ApiErrorPayloadType, TQueryFnData, TData>>
+  Array<UseApiQueryOptions<ApiErrorPayloadType, TQueryFnData, TData>>
 >
 
 export type UseApiMutationOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<

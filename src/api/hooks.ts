@@ -13,7 +13,6 @@ import {
   UseApiMutationResult,
   UseApiQueryOptions,
   UseApiQueryOptionsHomogenous,
-  UseApiQueryOptionsItem,
   UseApiQueryResult
 } from './types'
 import { unknownError } from '../errors'
@@ -31,6 +30,19 @@ const buildRequestError = <ApiErrorPayloadType>(e: unknown, context: unknown): R
   }
 }
 
+const queryFunction =
+  <ApiErrorPayloadType, TQueryFnData, TData, TQueryKey extends QueryKey = QueryKey>(
+    opts: UseApiQueryOptions<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>
+  ): QueryFunction<TQueryFnData, TQueryKey> =>
+  async (context) => {
+    // eslint-disable-next-line functional/no-try-statements
+    try {
+      return await opts.queryFn(context)
+    } catch (e) {
+      throw buildRequestError<ApiErrorPayloadType>(e, context)
+    }
+  }
+
 /**
  * Query request hook (this request result may be cached because we don't expect any data mutations with it)
  */
@@ -47,45 +59,18 @@ export const useApiQuery = <
 > =>
   useQuery({
     ...opts,
-    queryFn: async (context) => {
-      // eslint-disable-next-line functional/no-try-statements
-      try {
-        return await opts.queryFn(context)
-      } catch (e) {
-        throw buildRequestError<ApiErrorPayloadType>(e, context)
-      }
-    }
+    queryFn: queryFunction(opts)
   })
 
-const queryFunction =
-  <ApiErrorPayloadType, TQueryFnData, TData>(
-    opts: UseApiQueryOptionsItem<ApiErrorPayloadType, TQueryFnData, TData>
-  ): QueryFunction<TQueryFnData> =>
-  async (context) => {
-    // eslint-disable-next-line functional/no-try-statements
-    try {
-      return await opts.queryFn()
-    } catch (e) {
-      throw buildRequestError<ApiErrorPayloadType>(e, context)
-    }
-  }
-
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const useApiHomogenousQueries = <
-  ApiErrorPayloadType,
-  TQueryFnData = unknown,
-  TData = TQueryFnData
-  //TQueryKey extends QueryKey = QueryKey
->(
+export const useApiHomogenousQueries = <ApiErrorPayloadType, TQueryFnData = unknown, TData = TQueryFnData>(
   optionsList: UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>
 ): QueriesResults<Array<TQueryFnData>> =>
   useQueries({
-    queries: optionsList.map(
-      (opts /*: UseApiQueryOptionsItem<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>*/) => ({
-        ...opts,
-        queryFn: queryFunction<ApiErrorPayloadType, TQueryFnData, TData>(opts)
-      }) //as Omit<UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey>, 'context'>
-    ) as QueriesOptions<Array<TQueryFnData>>
+    queries: optionsList.map((opts) => ({
+      ...opts,
+      queryFn: queryFunction<ApiErrorPayloadType, TQueryFnData, TData>(opts)
+    })) as QueriesOptions<Array<TQueryFnData>>
   })
 
 /**
