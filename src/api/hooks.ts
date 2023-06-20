@@ -1,4 +1,12 @@
-import { QueryFunction, QueryKey, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  QueryFunction,
+  QueryKey,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions
+} from '@tanstack/react-query'
 import {
   UseApiMutationOptions,
   UseApiMutationResult,
@@ -22,7 +30,7 @@ const buildRequestError = <ApiErrorPayloadType>(e: unknown, context: unknown): R
 }
 
 const queryFunction =
-  <ApiErrorPayloadType, TQueryFnData, TData, TQueryKey extends QueryKey = QueryKey>(
+  <ApiErrorPayloadType, TQueryFnData = unknown, TData = TQueryFnData, TQueryKey extends QueryKey = QueryKey>(
     opts: UseApiQueryOptions<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>
   ): QueryFunction<TQueryFnData, TQueryKey> =>
   async (context) => {
@@ -53,15 +61,30 @@ export const useApiQuery = <
     queryFn: queryFunction(opts)
   })
 
+const buildOptions = <
+  ApiErrorPayloadType,
+  TQueryFnData = unknown,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey
+>(
+  opts: UseApiQueryOptions<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>
+): UseQueryOptions<TQueryFnData, RequestError<ApiErrorPayloadType>, TData, TQueryKey> => ({
+  ...opts,
+  queryFn: queryFunction<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>(opts)
+  //queryFn: queryFunction(opts)
+})
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const useApiHomogenousQueries = <ApiErrorPayloadType, TQueryFnData = unknown, TData = TQueryFnData>(
-  optionsList: UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>
-) =>
-  useQueries<TQueryFnData>({
-    queries: optionsList.map((opts) => ({
-      ...opts,
-      queryFn: queryFunction<ApiErrorPayloadType, TQueryFnData, TData>(opts)
-    }))
+export const useApiHomogenousQueries = <
+  ApiErrorPayloadType,
+  TQueryFnData = unknown,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey
+>({
+  ...optionsList
+}: Readonly<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>>) =>
+  useQueries<UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>>({
+    queries: optionsList.map(buildOptions)
   })
 
 /**

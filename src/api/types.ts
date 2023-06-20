@@ -28,7 +28,13 @@ export type RequestContext = Readonly<{
 // eslint-disable-next-line functional/no-mixed-types
 export type UseApiQueryAdditionalOptions<ApiErrorPayloadType, TData> = Readonly<{
   enabled?: boolean
+  /**
+   * @deprecated useEffect hook must be used instead
+   */
   onSuccess?: (data: TData) => void
+  /**
+   * @deprecated useEffect hook must be used instead
+   */
   onError?: (err: Readonly<RequestError<ApiErrorPayloadType>>) => void
   suspense?: boolean
   keepPreviousData?: boolean
@@ -62,9 +68,12 @@ export type UseApiQueryOptions<
     queryKeyHashFn?: QueryKeyHashFunction<TQueryKey>
   }>
 
-export type UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData = TQueryFnData> = Readonly<
-  Array<UseApiQueryOptions<ApiErrorPayloadType, TQueryFnData, TData>>
->
+export type UseApiQueryOptionsHomogenous<
+  ApiErrorPayloadType,
+  TQueryFnData,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey
+> = Array<UseApiQueryOptions<ApiErrorPayloadType, TQueryFnData, TData, TQueryKey>>
 
 export type UseApiMutationOptions<ApiErrorPayloadType, TData, TVariables, TContext = unknown> = Readonly<
   Omit<UseMutationOptions<TData, RequestError<ApiErrorPayloadType>, TVariables, TContext>, 'mutationFn'>
