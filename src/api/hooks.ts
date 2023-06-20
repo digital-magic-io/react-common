@@ -1,13 +1,4 @@
-import {
-  QueriesOptions,
-  QueriesResults,
-  QueryFunction,
-  QueryKey,
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient
-} from '@tanstack/react-query'
+import { QueryFunction, QueryKey, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   UseApiMutationOptions,
   UseApiMutationResult,
@@ -65,12 +56,12 @@ export const useApiQuery = <
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useApiHomogenousQueries = <ApiErrorPayloadType, TQueryFnData = unknown, TData = TQueryFnData>(
   optionsList: UseApiQueryOptionsHomogenous<ApiErrorPayloadType, TQueryFnData, TData>
-): QueriesResults<Array<TQueryFnData>> =>
-  useQueries({
+) =>
+  useQueries<TQueryFnData>({
     queries: optionsList.map((opts) => ({
       ...opts,
       queryFn: queryFunction<ApiErrorPayloadType, TQueryFnData, TData>(opts)
-    })) as QueriesOptions<Array<TQueryFnData>>
+    }))
   })
 
 /**
