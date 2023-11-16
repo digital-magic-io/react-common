@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { hasValue } from '@digital-magic/ts-common-utils'
-import { HtmlMouseEventHandler } from './types'
 
 /**
  * Form handle to be used as type for Ref object.
@@ -57,28 +56,32 @@ export const hideDialog = (ref: React.RefObject<ModalDialogHandle>): void =>
  * @param ref modal dialog reference
  * @param f initialize function (will be executed before dialog will be shown)
  */
-export const handleWithShowDialog: (ref: React.RefObject<ModalDialogHandle>, f?: () => void) => HtmlMouseEventHandler =
-  (ref, f) => (e) => {
-    e.preventDefault()
-    if (f !== undefined) {
-      f()
-    }
-    showDialog(ref)
+export const handleWithShowDialog: (
+  ref: React.RefObject<ModalDialogHandle>,
+  f?: () => void
+) => React.MouseEventHandler<HTMLElement> = (ref, f) => (e) => {
+  e.preventDefault()
+  if (f !== undefined) {
+    f()
   }
+  showDialog(ref)
+}
 
 /**
  * Build a handler that hides modal dialog.
  * @param ref modal dialog reference
  * @param f finalize function (will be executed before dialog will be hidden)
  */
-export const handleWithHideDialog: (ref: React.RefObject<ModalDialogHandle>, f?: () => void) => HtmlMouseEventHandler =
-  (ref, f) => (e) => {
-    e.preventDefault()
-    if (f !== undefined) {
-      f()
-    }
-    hideDialog(ref)
+export const handleWithHideDialog: (
+  ref: React.RefObject<ModalDialogHandle>,
+  f?: () => void
+) => React.MouseEventHandler<HTMLElement> = (ref, f) => (e) => {
+  e.preventDefault()
+  if (f !== undefined) {
+    f()
   }
+  hideDialog(ref)
+}
 
 export const useDialogRef = (): React.RefObject<ModalDialogHandle> => React.useRef(null)
 
